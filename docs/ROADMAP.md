@@ -4,7 +4,8 @@
 1. ~~pink_partner~~ (prototype, tested in-game)
 2. ~~pink_encounters_trainers~~ (built, verified headlessly, needs playtest)
 3. ~~pink_species~~ (built, verified headlessly, needs playtest)
-4. pink_world_tweaks
+4. pink_world_tweaks: data layer done (verified headlessly); scripts next
+4b. pink_tilesets
 5. pink_palettes
 6. pink_manga_events
 7. pink_presentation (art permissions first)
@@ -39,6 +40,21 @@ built from the merged learnsets, as the ROM builds them from Pink's).
 `pink_palettes`; the VC Mew replacing Mewtwo is an event, so it goes with
 `pink_manga_events`; the Linking Cable's place in the Celadon mart goes with
 `pink_world_tweaks`.
+
+**Rooftop Fly.** Pink widens only the party menu's Fly check. The engine has
+no hook for it, so both Celadon roofs are marked `outdoor`. Side effects
+accepted for now: Teleport works there, and the roof can become the
+"last outdoor spot" an Escape Rope or Dig returns to.
+
+**Game Corner prizes** are hardcoded in the engine's `data/scripts/story3.lua`
+(no registry), so Pink's prize lists need a hook into the prize counter and
+the `engine_internals` permission.
+
+**Tile art.** Of the 93 tiles Pink changes, 30 exist in international Red/Blue
+and get built at runtime from the player's own Red or Blue import (the Facets
+route, `engine_internals` + `CacheFs`). The other 63 exist in no cart (checked
+against Red, Blue, Yellow and Japanese Blue), so they are Pink's own tiles and
+ship as a patch image credited to jcferggy, gated on his permission.
 
 **Super Rod** lives in the `field` registry, where lists append, so the mod
 rebuilds the whole `superRod` key from the merged view.

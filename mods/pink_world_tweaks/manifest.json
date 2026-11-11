@@ -1,0 +1,23 @@
+{
+  "id": "pink_world_tweaks",
+  "name": "Pink World Tweaks",
+  "version": "0.2.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "GAMEPLAY",
+  "priority": 108,
+  "dependencies": [
+    "pink_partner@>=0.2.0",
+    "pink_species@>=0.2.0"
+  ],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "incompatible": [],
+  "games": [
+    "yellow"
+  ],
+  "experimental": true,
+  "description": "Pokemon Pink: map edits, new Cut trees, Mansion ledges, rooftop Fly, the Linking Cable at the Celadon Dept. Store and more."
+}

@@ -19,6 +19,18 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   Pokémon like an evolution stone and consumed. It plays no heal sound on use;
   the stone's sound isn't reachable from a mod.
 
+## pink_world_tweaks
+- Block layouts on 30 maps (171 cells), applied cell by cell to the imported maps.
+- 28 tileset blocks redefined (Overworld 9, Forest 10, Facility 8, Interior 1),
+  walkable-tile lists for Forest and Facility, four new Cut-tree block pairs.
+- Celadon Dept. Store roof and Celadon Mansion roof count as outdoor maps
+  (Fly works there; so does Teleport, and an Escape Rope or Dig can return there).
+- Celadon Dept. Store 4F sells the Linking Cable.
+- Safari Zone Gate's unreachable hidden Nugget removed; a hidden Full Restore at
+  Vermilion Dock (21, 0).
+- Dungeon battle intro also on Pokémon Mansion 1F, Victory Road 2F/3F, Power
+  Plant, Diglett's Cave, Silph Co. 9F-11F, Seafoam B1F-B4F, Rocket Hideout B1F-B4F.
+
 ## pink_encounters_trainers
 - Grass and water encounters on 36 maps, and Super Rod tables on 26 maps, as in Pink.
 - Trainer parties for 17 classes (generic trainers restored to Red/Blue, manga
