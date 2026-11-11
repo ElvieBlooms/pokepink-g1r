@@ -12,12 +12,18 @@ your partner. This mod leaves that id alone and swaps what the slots hold:
 | CLEFAIRY | Pikachu (#25)  | Thunder Stone -> CLEFABLE slot |
 | CLEFABLE | Raichu (#26)   | - |
 
-Everything is read from your own imported game at load time; the mod ships
-no ROM data or art.
+Everything else is read from your own imported game at load time; the mod
+ships no ROM data or ROM art.
 
-Also: the overworld follower uses Clefairy's overworld sprite, and Yellow's
-recorded Pikachu voice clips are switched off so the partner uses Clefairy's
-normal cry.
+Also: the overworld follower is an animated Clefairy, and Yellow's recorded
+Pikachu voice clips are switched off so the partner uses Clefairy's normal cry.
+
+## Credits
+
+- Clefairy overworld walking sprite (`assets/clefairy_follower.png`) by
+  **Anima_nel**, purchased for use in this project. It is not covered by the
+  MIT license and may not be reused outside this mod without the artist's
+  permission.
 
 Known gaps (later mods): emotion portraits, surfing minigame art, title
 screen, text that names PIKACHU directly, Pink's Clefairy voice clips.

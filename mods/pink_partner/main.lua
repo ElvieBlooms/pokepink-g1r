@@ -73,14 +73,20 @@ return function(mod)
   -- partner uses the (swapped) Clefairy chip cry instead.
   mod.content.audio:override("pikaCries", false)
 
-  -- overworld follower: Clefairy's overworld sheet from the player's import
-  local clefSprite = mod.content.sprites:get("SPRITE_CLEFAIRY")
-  if clefSprite then
-    local s = deepcopy(clefSprite)
-    s.id = "SPRITE_PIKACHU"
-    s.source = nil
-    mod.content.sprites:override("SPRITE_PIKACHU", s)
-  end
+  -- overworld follower: Clefairy walking frames by Anima_nel (purchased for
+  -- this project; not covered by the repo's MIT license).  Six 16x16 frames
+  -- in the engine's walker order: stand down, stand up, stand left, walk
+  -- down, walk up, walk left (right is drawn mirrored).  trueColor keeps the
+  -- artist's colours in full-colour mode.  In the Game Boy palette modes the
+  -- engine shades sprites by the red channel (>83% is transparent), so each
+  -- colour's red value was lowered just enough to land on the right shade.
+  mod.content.sprites:override("SPRITE_PIKACHU", {
+    id = "SPRITE_PIKACHU",
+    image = mod.assets:path("assets/clefairy_follower.png"),
+    frames = 6,
+    walker = true,
+    trueColor = true,
+  })
 
   -- Tester option, off by default: turn it on in the mod manager to get one
   -- Moon Stone per save (the first time you enter a map), for checking that

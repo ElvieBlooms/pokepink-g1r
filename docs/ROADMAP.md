@@ -55,7 +55,6 @@ party number.
   `db CLASS, id` header (Abra: Psywave, Kinesis, Thunder Wave, Tri Attack).
   The ROM reads it as noise, so no trainer gets those moves; the port matches.
   Ask jcferggy which trainer it was meant for.
-- Follower has no walking animation (vanilla Clefairy overworld sheet).
 - Emotion portraits, surfing minigame and title screen still show Pikachu.
 - Text that names PIKACHU directly is not yet replaced.
 - The partner swap uses the deprecated `audio` registry to turn off the

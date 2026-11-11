@@ -7,7 +7,7 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   holds Clefable (#36), `CLEFAIRY` holds Pikachu (#25), `CLEFABLE` holds Raichu (#26).
   Names, Pokédex numbers, stats, types, sprites, cries, palettes, learnsets and
   Pokédex entries move with them; evolutions are rewired (Moon Stone for the partner).
-- The partner follower uses the Clefairy overworld sprite (no walking frames yet).
+- The partner follower is an animated Clefairy (Anima_nel's sprite, kept in its own colours).
 - Yellow's recorded Pikachu voice clips are off; the partner uses Clefairy's normal cry.
 - Tester option (off by default): one Moon Stone per save.
 

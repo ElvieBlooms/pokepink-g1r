@@ -79,7 +79,9 @@ save directory (`yellow/data/generated`). It's read locally and never committed.
 
 The code and tools in this repo are by ElvieBlooms, under the [MIT License](LICENSE).
 
-The MIT License covers this port's own work only. Pokémon Pink's design and
+The MIT License covers this port's own work only. Art credited to other
+artists in [CREDITS.md](CREDITS.md) (for example Anima_nel's Clefairy sprite) is
+used with their permission and is not MIT-licensed. Pokémon Pink's design and
 data (the encounter tables, trainer teams and events these mods recreate)
 belong to jcferggy, and any art from the hack belongs to its artists. See
 [CREDITS.md](CREDITS.md). Pokémon is © Nintendo / Creatures / Game Freak; this

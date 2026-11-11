@@ -12,6 +12,10 @@
 
 No art from the hack ships in this repo until its permission line above says granted.
 
+## Art made for this port
+- **Anima_nel**: Clefairy overworld walking sprite (`mods/pink_partner/assets/clefairy_follower.png`).
+  Purchased for use in this project, with credit. Not covered by the MIT license.
+
 ## Foundations
 - **pret** (pokeyellow disassembly), which Pink is built on.
 - **bryanthaboi** and contributors: Gen1Recomp and its modding API.
