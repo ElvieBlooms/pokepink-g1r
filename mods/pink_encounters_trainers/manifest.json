@@ -1,0 +1,22 @@
+{
+  "id": "pink_encounters_trainers",
+  "name": "Pink Encounters & Trainers",
+  "version": "0.2.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "GAMEPLAY",
+  "priority": 110,
+  "dependencies": [
+    "pink_partner@>=0.2.0"
+  ],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "incompatible": [],
+  "games": [
+    "yellow"
+  ],
+  "experimental": true,
+  "description": "Pokemon Pink: wild encounters, Super Rod tables and trainer teams (manga Gym Leaders and rivals, Red/Blue trainers restored)."
+}
