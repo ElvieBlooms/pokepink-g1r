@@ -11,8 +11,18 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - Yellow's recorded Pikachu voice clips are off; the partner uses Clefairy's normal cry.
 - Tester option (off by default): one Moon Stone per save.
 
+## pink_species
+- Pink's learnsets and TM/HM lists for Clefairy (learns TM39 Swift and HM03 Surf)
+  and Clefable.
+- Kadabra, Machoke, Graveler and Haunter can also evolve with the Linking Cable.
+- `ITEM_32` (unused in Yellow) becomes the LINKINGCABLE: ¥8000, used on a party
+  Pokémon like an evolution stone and consumed. It plays no heal sound on use;
+  the stone's sound isn't reachable from a mod.
+
 ## pink_encounters_trainers
 - Grass and water encounters on 36 maps, and Super Rod tables on 26 maps, as in Pink.
 - Trainer parties for 17 classes (generic trainers restored to Red/Blue, manga
   Gym Leaders and rival, Agatha's Clefable), with Pink's hand-picked trainer moves.
 - Rival 2 and 3: Pink's single team per fight fills every vanilla Eevee branch.
+- Trainer movesets that Pink hand-picked are built from Pink's learnsets
+  (loads after pink_species).

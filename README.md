@@ -24,21 +24,22 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 |---|---|---|
 | `pink_partner` | Clefairy is your partner instead of Pikachu (species-slot swap, follower, cry) | prototype |
 | `pink_encounters_trainers` | Pink's wild Pokémon, Super Rod tables and trainer teams | done, needs playtest |
-| `pink_species` | Clefairy's learnset, Surf/Swift, palette lines, VC Mew | planned |
-| `pink_world_tweaks` | new Cut trees, mansion ledges, Silph warp, roof Fly, S.S. Anne redock, Linking Cable, Oak heals | planned |
-| `pink_palettes` | Pink's Red-referencing palettes | planned |
-| `pink_manga_events` | Trainers Blue and Yellow, Busybody rematches, Imposter, surfing beach | planned |
+| `pink_species` | Clefairy's and Clefable's learnsets, Surf/Swift, the Linking Cable | done, needs playtest |
+| `pink_world_tweaks` | new Cut trees, mansion ledges, Silph warp, roof Fly, S.S. Anne redock, Linking Cable in the Celadon mart, Oak heals | planned |
+| `pink_palettes` | Pink's Red-referencing palettes, incl. the split Geodude/Jynx palette lines | planned |
+| `pink_manga_events` | Trainers Blue and Yellow, Busybody rematches, Imposter, surfing beach, VC Mew in place of Mewtwo | planned |
 | `pink_presentation` | title screen, intro, SGB borders, slots, emotion portraits | planned, waiting on art permissions |
 
 Every mod depends on `pink_partner`: the others refer to Clefairy and Pikachu
 by their swapped internal IDs (see [docs/ROADMAP.md](docs/ROADMAP.md)).
+Load order is `pink_partner`, then `pink_species`, then `pink_encounters_trainers`.
 
 ## Layout
 
 ```
 mods/<id>/          one folder per mod, exactly what goes in its .zip
 tools/release.py    builds every mod as one lockstep release (runs modkit gates)
-tools/gen_pink_data.py   regenerates pink_encounters_trainers/data.lua from Pink's disassembly
+tools/gen_pink_data.py   regenerates pink_encounters_trainers/data.lua and pink_species/species_data.lua
 tools/verify_pink.py     loads the mods over an imported Yellow and diffs against Pink
 docs/ROADMAP.md     plan, decisions and known issues
 DIFFERENCES.md      what each mod changes from vanilla Yellow
@@ -64,11 +65,11 @@ git tag v0.3.0 && git push --follow-tags  # the workflow builds and publishes th
 ```sh
 # vanilla self-check: must report 0 differences
 python3 tools/gen_pink_data.py path/to/pokeyellow path/to/yellow/data/generated /dev/null --selftest
-# Pink
+# Pink (also writes mods/pink_species/species_data.lua)
 python3 tools/gen_pink_data.py path/to/pokepink path/to/yellow/data/generated mods/pink_encounters_trainers/data.lua
 # check the result in-engine
 POKEPORT_DATA_DIR=path/to/yellow/data/generated POKEPORT_VERSION=yellow \
-  python3 tools/verify_pink.py path/to/pokepink mods/pink_partner mods/pink_encounters_trainers
+  python3 tools/verify_pink.py path/to/pokepink mods/pink_partner mods/pink_species mods/pink_encounters_trainers
 ```
 
 `path/to/yellow/data/generated` is the imported-data folder in your Gen1Recomp

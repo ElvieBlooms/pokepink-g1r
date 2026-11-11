@@ -3,7 +3,7 @@
 ## Order
 1. ~~pink_partner~~ (prototype, tested in-game)
 2. ~~pink_encounters_trainers~~ (built, verified headlessly, needs playtest)
-3. pink_species
+3. ~~pink_species~~ (built, verified headlessly, needs playtest)
 4. pink_world_tweaks
 5. pink_palettes
 6. pink_manga_events
@@ -28,6 +28,18 @@ Rival 3: 1-3). The trainer data fills vanilla's numbering with Pink's teams,
 so **pink_manga_events must keep vanilla's rival party-number logic** rather
 than porting Pink's fixed numbers.
 
+**Species data** is compared field by field against the import and written
+to the slot that carries each species, so Pink's Clefairy data patches the
+`PIKACHU` slot. `pink_species` loads after `pink_partner` (so the swap is in
+place) and before `pink_encounters_trainers` (whose trainer movesets are
+built from the merged learnsets, as the ROM builds them from Pink's).
+
+**Moved out of pink_species:** the split Geodude/Jynx palette lines (Pink's
+`data/pokemon/palettes.asm`) need new palettes, so they go with
+`pink_palettes`; the VC Mew replacing Mewtwo is an event, so it goes with
+`pink_manga_events`; the Linking Cable's place in the Celadon mart goes with
+`pink_world_tweaks`.
+
 **Super Rod** lives in the `field` registry, where lists append, so the mod
 rebuilds the whole `superRod` key from the merged view.
 
@@ -37,6 +49,8 @@ Pink's picks), because the engine would otherwise apply vanilla's list by
 party number.
 
 ## Known issues / questions
+- Using the Linking Cable plays no sound (the stone's heal sound isn't
+  available to mods).
 - Pink's `data/trainers/special_moves.asm` has a `PSYCHIC:` label with no
   `db CLASS, id` header (Abra: Psywave, Kinesis, Thunder Wave, Tri Attack).
   The ROM reads it as noise, so no trainer gets those moves; the port matches.

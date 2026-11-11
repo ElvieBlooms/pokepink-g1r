@@ -45,7 +45,17 @@ local function enc(v)
 end
 local tr = {}
 for id, r in pairs(data.trainers) do tr[id] = { parties = r.parties } end
-io.stderr:write("@@JSON@@" .. enc({ encounters = data.encounters, superRod = data.field.superRod, trainers = tr }) .. "\n")
+local mons = {}
+for id, r in pairs(data.pokemon) do
+  mons[id] = { baseStats = r.baseStats, types = r.types, catchRate = r.catchRate, baseExp = r.baseExp,
+    level1Moves = r.level1Moves, growthRate = r.growthRate, tmhm = r.tmhm,
+    evolutions = r.evolutions, learnset = r.learnset, name = r.name }
+end
+local cable = data.items.ITEM_32
+local eff = cable and cable.effect and data.item_effects and data.item_effects[cable.effect]
+io.stderr:write("@@JSON@@" .. enc({ encounters = data.encounters, superRod = data.field.superRod, trainers = tr,
+  pokemon = mons, cable = { name = cable and cable.name, price = cable and cable.price,
+  effect = cable and cable.effect, hasUse = eff and type(eff.use) == "function" or false } }) .. "\n")
 '''
 open("/tmp/vpink.lua", "w").write(driver)
 p = subprocess.run(["luajit", "/tmp/vpink.lua"], cwd=repo, capture_output=True, text=True)
@@ -85,11 +95,28 @@ for i, label in enumerate(pointers):
     checked += 1
     if got != want:
         bad += 1; print("TRAINER MISMATCH", cls)
-print("checked %d wild maps, %d super rod maps, %d trainer classes: %d mismatches"
-      % (len(wild), len(rod), checked, bad))
+# species: the slot carrying species S must hold Pink's data for S
+pink_mons = g.parse_species(pink_root)
+for species, rec in pink_mons.items():
+    want = g.norm_species(rec)
+    want["evolutions"] = [dict(e, species=g.SWAP.get(e["species"], e["species"])) for e in want["evolutions"]]
+    slot = g.SWAP.get(species, species)
+    got = merged["pokemon"].get(slot)
+    if not got:
+        bad += 1; print("SPECIES MISSING", slot); continue
+    if got.get("name") != species.replace("_", " ").replace("NIDORAN M", "NIDORAN♂").replace("NIDORAN F", "NIDORAN♀") \
+            and slot in g.SWAP:
+        print("  note: slot", slot, "is named", got.get("name"))
+    gotn = g.norm_species(got)
+    for k in g.SPECIES_FIELDS:
+        if gotn[k] != want[k]:
+            bad += 1; print("SPECIES MISMATCH", slot, "(carries %s)" % species, k)
+print("cable:", merged["cable"])
+print("checked %d wild maps, %d super rod maps, %d trainer classes, %d species: %d mismatches"
+      % (len(wild), len(rod), checked, len(pink_mons), bad))
 
 # show the hand-picked movesets that were built, for a spot check
-for opp in sys.argv[2:] and ["OPP_BROCK", "OPP_MISTY", "OPP_RIVAL3", "OPP_AGATHA"]:
+for opp in ["OPP_MISTY", "OPP_RIVAL3", "OPP_AGATHA"]:
     for pi, party in enumerate(merged["trainers"][opp]["parties"][:1], 1):
         print(opp, "party", pi, "; ".join("%s L%d %s" % (m["species"], m["level"], "/".join(m.get("moves") or ["(default)"]))
                                           for m in party))

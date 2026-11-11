@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Generate pink_encounters_trainers/data.lua from a pret-style disassembly.
 
-Usage: gen_pink_data.py <disasm_root> <imported_generated_dir> <out.lua> [--selftest]
+Usage: gen_pink_data.py <disasm_root> <imported_generated_dir> <out.lua> [--species-out PATH] [--selftest]
+
+<out.lua> is mods/pink_encounters_trainers/data.lua; species data goes to
+mods/pink_species/species_data.lua next to it unless --species-out is given.
 
 Parses data/wild/grass_water.asm (+ map files), data/wild/super_rod.asm,
 data/trainers/parties.asm and data/trainers/special_moves.asm, applies the
@@ -177,6 +180,116 @@ def parse_special(root, warnings):
         out[cur[0]][cur[1]].append({"mon": num(a[0]), "slot": num(a[1]), "move": a[2]})
     return out
 
+# ---------------------------------------------------------------- species
+def parse_mon_consts(root):
+    names = []
+    for line in open(os.path.join(root, "constants/pokemon_constants.asm")):
+        m = re.match(r"\s*const\s+(\w+)", line)
+        if m:
+            names.append(m.group(1))
+        elif re.match(r"\s*const_skip\b", line):
+            names.append("MISSINGNO")  # unused index
+    return names  # index 0 = NO_MON
+
+def parse_base_stats(root):
+    out = {}
+    d = os.path.join(root, "data/pokemon/base_stats")
+    for fn in sorted(os.listdir(d)):
+        if not fn.endswith(".asm"):
+            continue
+        text = open(os.path.join(d, fn)).read()
+        lines = [strip(l) for l in text.splitlines()]
+        dbs = [db_args(l) for l in lines if l.startswith("db ")]
+        species = dbs[0][0]
+        assert species.startswith("DEX_"), fn
+        species = species[4:]
+        stats = [num(x) for x in dbs[1]]
+        types = []
+        for t in dbs[2]:
+            if t not in types:
+                types.append(t)
+        rec = {
+            "baseStats": dict(zip(["hp", "attack", "defense", "speed", "special"], stats)),
+            "types": types,
+            "catchRate": num(dbs[3][0]),
+            "baseExp": num(dbs[4][0]),
+            "level1Moves": [m for m in dbs[5] if m != "NO_MOVE"],
+            "growthRate": dbs[6][0].replace("GROWTH_", ""),
+        }
+        # tmhm macro, continued with backslashes
+        joined = re.sub(r"\\\s*\n", " ", "\n".join(lines))
+        m = re.search(r"^tmhm[ \t]*(.*)$", joined, re.M)
+        rec["tmhm"] = [x.strip() for x in m.group(1).split(",") if x.strip()] if m and m.group(1).strip() else []
+        out[species] = rec
+    return out
+
+def parse_evos_moves(root):
+    consts = parse_mon_consts(root)
+    text = [strip(l) for l in open(os.path.join(root, "data/pokemon/evos_moves.asm"))]
+    ptrs, blocks, cur, phase = [], {}, None, None
+    for line in text:
+        if not line:
+            continue
+        m = re.match(r"dw\s+(\w+)", line)
+        if m and cur is None:
+            ptrs.append(m.group(1))
+            continue
+        m = re.match(r"(\w+):$", line)
+        if m:
+            cur = m.group(1)
+            if cur == "EvosMovesPointerTable":
+                cur = None
+                continue
+            blocks[cur] = {"evolutions": [], "learnset": []}
+            phase = "evo"
+            continue
+        a = db_args(line)
+        if a is None or cur is None:
+            continue
+        if a == ["0"]:
+            phase = "moves" if phase == "evo" else "done"
+            continue
+        if phase == "evo":
+            kind = a[0]
+            if kind == "EVOLVE_LEVEL":
+                blocks[cur]["evolutions"].append({"method": "LEVEL", "level": num(a[1]), "species": a[2]})
+            elif kind == "EVOLVE_ITEM":
+                blocks[cur]["evolutions"].append({"method": "ITEM", "item": a[1], "level": num(a[2]), "species": a[3]})
+            elif kind == "EVOLVE_TRADE":
+                blocks[cur]["evolutions"].append({"method": "TRADE", "level": num(a[1]), "species": a[2]})
+            else:
+                raise SystemExit("unknown evolution " + line)
+        elif phase == "moves":
+            blocks[cur]["learnset"].append({"level": num(a[0]), "move": a[1]})
+    out = {}
+    for i, label in enumerate(ptrs):
+        species = consts[i + 1]
+        if species.startswith("MISSINGNO") or label.startswith("MissingNo"):
+            continue
+        out[species] = blocks[label]
+    return out
+
+SPECIES_FIELDS = ("baseStats", "types", "catchRate", "baseExp", "level1Moves",
+                  "growthRate", "tmhm", "evolutions", "learnset")
+
+def parse_species(root):
+    stats = parse_base_stats(root)
+    evos = parse_evos_moves(root)
+    out = {}
+    for species, rec in stats.items():
+        rec = dict(rec)
+        rec.update(evos.get(species, {"evolutions": [], "learnset": []}))
+        out[species] = rec
+    return out
+
+def norm_species(rec):
+    r = {k: rec.get(k) for k in SPECIES_FIELDS}
+    r["tmhm"] = sorted(r["tmhm"] or [])
+    r["evolutions"] = [{k: e[k] for k in ("method", "item", "level", "species") if k in e}
+                       for e in (r["evolutions"] or [])]
+    r["learnset"] = [{"level": m["level"], "move": m["move"]} for m in (r["learnset"] or [])]
+    return r
+
 # ---------------------------------------------------------------- import
 def load_import(gen_dir):
     script = r'''
@@ -209,7 +322,14 @@ local f = dofile(dir .. "/field.lua")
 local tr = dofile(dir .. "/trainers.lua")
 local slim = {}
 for id, r in pairs(tr) do slim[id] = { parties = r.parties, specialMoves = r.specialMoves } end
-io.write(enc({ encounters = e, superRod = f.superRod, trainers = slim }))
+local pk = dofile(dir .. "/pokemon.lua")
+local mons = {}
+for id, r in pairs(pk) do
+  mons[id] = { baseStats = r.baseStats, types = r.types, catchRate = r.catchRate, baseExp = r.baseExp,
+    level1Moves = r.level1Moves, growthRate = r.growthRate, tmhm = r.tmhm,
+    evolutions = r.evolutions, learnset = r.learnset }
+end
+io.write(enc({ encounters = e, superRod = f.superRod, trainers = slim, pokemon = mons }))
 '''
     p = subprocess.run(["luajit", "-e", script.replace("arg[1]", repr(gen_dir))],
                        capture_output=True, text=True)
@@ -315,7 +435,27 @@ def main():
             if entry:
                 sp_out[opp] = entry
 
+    # species: Pink's data for species S is written to the slot that carries S
+    sp_species = {}
+    pink_species = parse_species(root)
+    for species, rec in sorted(pink_species.items()):
+        want = norm_species(rec)
+        if do_swap:
+            want["evolutions"] = [dict(e, species=SWAP.get(e["species"], e["species"])) for e in want["evolutions"]]
+        slot = SWAP.get(species, species) if do_swap else species
+        carried = SWAP.get(slot, slot) if do_swap else slot  # vanilla species living in that slot after pink_partner
+        base = norm_species(imp["pokemon"][carried])
+        if do_swap:
+            base["evolutions"] = [dict(e, species=SWAP.get(e["species"], e["species"])) for e in base["evolutions"]]
+        diff = {k: want[k] for k in SPECIES_FIELDS if want[k] != base[k]}
+        if diff:
+            if "tmhm" in diff:
+                diff["tmhm"] = rec["tmhm"]  # keep TM-number order
+            sp_species[slot] = diff
+
     if selftest:
+        print("selftest species:", len(sp_species), "differ")
+        for k in list(sp_species)[:8]: print("  species", k, json.dumps(sp_species[k])[:300])
         print("selftest:", len(enc_out), "encounter maps,", len(rod_out), "super rod maps,",
               len(tr_out), "trainer classes,", len(sp_out), "special-move classes differ")
         for k in list(enc_out)[:10]: print("  enc", k, json.dumps(enc_out[k])[:200])
@@ -331,6 +471,15 @@ def main():
         f.write("-- the pink_partner slots (internal PIKACHU = Clefairy, and so on).\n")
         f.write("return " + to_lua({"encounters": enc_out, "superRod": rod_out,
                                     "trainers": tr_out, "special": sp_out}) + "\n")
+    species_out = (sys.argv[sys.argv.index("--species-out") + 1] if "--species-out" in sys.argv
+                   else os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(out_path))),
+                                     "pink_species", "species_data.lua"))
+    with open(species_out, "w") as f:
+        f.write("-- generated by gen_pink_data.py from Pokemon Pink's disassembly; do not edit.\n")
+        f.write("-- Only fields that differ from vanilla Yellow are listed, keyed by the\n")
+        f.write("-- pink_partner slot that carries the species (PIKACHU = Clefairy, ...).\n")
+        f.write("return " + to_lua(sp_species) + "\n")
+    print("wrote", species_out, ":", len(sp_species), "species")
     print("wrote", out_path, ":", len(enc_out), "encounter maps,", len(rod_out),
           "super rod maps,", len(tr_out), "trainer classes,", len(sp_out), "special-move classes")
     for w in warnings:
