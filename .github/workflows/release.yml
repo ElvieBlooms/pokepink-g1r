@@ -1,0 +1,68 @@
+name: Release
+
+# Publishes every mod in mods/ as one release when a vX.Y.Z tag is pushed:
+#   pink_partner-X.Y.Z.zip, pink_encounters_trainers-X.Y.Z.zip, ...
+#   sha256sums.txt   (cartkit reads this to pin each mod in the cart)
+#
+# To cut a release:
+#   python3 tools/release.py X.Y.Z --stamp   # bump every manifest, build locally
+#   git commit -am "Release X.Y.Z" && git tag vX.Y.Z && git push --follow-tags
+#
+# The build runs the engine's own modkit gates (validate --strict, lint,
+# pack), so a release with ROM-derived content is refused here too.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build, e.g. v0.2.0"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Checkout the gen1recomp engine (for modkit)
+        uses: actions/checkout@v4
+        with:
+          repository: bryanthaboi/gen1recomp
+          path: .engine
+          fetch-depth: 1
+
+      - name: Install luajit
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq luajit
+
+      - name: Build every mod
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          python3 tools/release.py "$VERSION" --engine "$GITHUB_WORKSPACE/.engine" --out "$GITHUB_WORKSPACE/dist"
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* --title "Pokémon Pink for Gen1Recomp $TAG" \
+              --notes "Every Pokémon Pink mod at ${TAG#v}. Install them together on Yellow, or play the Pokémon Pink cart, which pins this release."
+          fi
