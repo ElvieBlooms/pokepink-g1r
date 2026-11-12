@@ -11,13 +11,14 @@
 - **jcferggy**: Pink's own tile edits (`mods/pink_tilesets/assets/pink_tiles.png`,
   59 tiles found in no Red, Blue, Yellow or Japanese Blue cart). Not covered by
   the MIT license; shipped with jcferggy's permission.
-- **Artsy-Theo**: Clefairy emotion portraits. Permission: *not yet asked.*
+- **Artsy-Theo**: Clefairy emotion portraits.
 - **Sindorman**: the Clefairy animation that inspired the project (credited in
   Pink's README). Whether any of Sindorman's art is in the game: *to confirm.*
-- Title screen art: *artist to confirm with jcferggy.*
+- Title screen art: *artist to confirm.*
 
-jcferggy's permission covers his own work. Art made by someone else (such as
-Artsy-Theo's portraits) still needs that artist's own permission before it ships.
+These artists have not been contacted directly. jcferggy says he can't speak
+for them, but in his experience they were fine with reuse as long as they are
+credited. Their art is credited here and will be removed on request.
 
 - **jcferggy**: the Busybody's overworld sprite and trainer picture
   (`mods/pink_manga_events/assets/`), and Pink's dialogue used in the mods.
