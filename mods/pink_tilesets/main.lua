@@ -11,11 +11,14 @@
 -- the engine uses a loaded mod's derived art in place of the imported
 -- image.  No vanilla tile ships with this mod.
 --
--- Needs engine_internals: src.import.CacheFs reads the other games' imports.
+-- Needs engine_internals: src.import.CacheFs reads the other games' imports
+-- and writes the result.  (A mod's own love.filesystem is a stand-in whose
+-- writes go to the mod's private storage, where the asset resolver never
+-- looks.)
 
 return function(mod)
-  if not (love and love.image and love.filesystem and love.filesystem.write) then
-    return -- headless tools (modkit) have no image or file access: nothing to build
+  if not (love and love.image) then
+    return -- headless tools (modkit) have no image access: nothing to build
   end
 
   local function own(path)
@@ -27,7 +30,8 @@ return function(mod)
   end
 
   local okFs, CacheFs = pcall(require, "src.import.CacheFs")
-  if not okFs or type(CacheFs) ~= "table" or type(CacheFs.readAt) ~= "function" then
+  if not okFs or type(CacheFs) ~= "table" or type(CacheFs.readAt) ~= "function"
+      or type(CacheFs.write) ~= "function" then
     mod.log:warn("CacheFs is unavailable; Pink's tiles are not built")
     return
   end
@@ -76,8 +80,19 @@ return function(mod)
     return true
   end
 
+  -- CacheFs.prefix is the active game's folder for some callers; the
+  -- derived folder sits at the cache root, so it's cleared around each call
+  local function atRoot(fn, ...)
+    local saved = CacheFs.prefix
+    CacheFs.prefix = ""
+    local ok, a, b = pcall(fn, ...)
+    CacheFs.prefix = saved
+    if not ok then return false, a end
+    return a, b
+  end
+
   local outDir = "save/mod-derived/" .. mod.id .. "/tilesets"
-  love.filesystem.createDirectory(outDir)
+  if CacheFs.createDirectory then atRoot(CacheFs.createDirectory, outDir) end
 
   local built, fallbacks = 0, 0
   for name, changes in pairs(own("tile_data.lua")) do
@@ -103,9 +118,13 @@ return function(mod)
       end
       local png = out:encode("png"):getString()
       local path = outDir .. "/" .. name .. ".png"
-      local existing = love.filesystem.getInfo(path) and love.filesystem.read(path)
-      if existing ~= png then love.filesystem.write(path, png) end
-      built = built + 1
+      local okWrite, writeErr = true, nil
+      if atRoot(CacheFs.readAt, path) ~= png then okWrite, writeErr = atRoot(CacheFs.write, path, png) end
+      if okWrite then
+        built = built + 1
+      else
+        mod.log:warn("can't write %s (%s); Yellow's sheet stays", path, tostring(writeErr))
+      end
     end
   end
   mod.log:info("built %d tilesets (%d tiles kept Yellow's art)", built, fallbacks)

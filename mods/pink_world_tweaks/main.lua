@@ -220,6 +220,83 @@ return function(mod)
     mod.log:warn("can't find the captain's script; his Champion line is skipped")
   end
 
+  -- Oak's "<PLAYER> received a @!" reads the given Pokemon's name from
+  -- wNameBuffer in the cart (Pink's OaksLab text), so with Clefairy in the
+  -- PIKACHU slot it says CLEFAIRY.  The engine's Yellow lab script fills
+  -- that blank with the literal "PIKACHU", so the handler's rows get the
+  -- slot's real name before they run (the rest of the script is untouched).
+  local okLab, Lab = pcall(require, "data.scripts.oaks_lab_yellow")
+  local giveBall = okLab and type(Lab) == "table" and type(Lab.talk) == "table"
+    and Lab.talk.TEXT_OAKSLAB_EEVEE_POKE_BALL
+  if type(giveBall) == "function" then
+    local function renamed(game, rows)
+      local data = game and game.data
+      local mon = data and data.pokemon and data.pokemon.PIKACHU
+      local name = type(mon) == "table" and type(mon.name) == "string" and mon.name or nil
+      if not name or name == "PIKACHU" then return rows end
+      local out = {}
+      for i, row in ipairs(rows) do
+        if type(row) == "table" and row[1] == "show_text" and row[2] == "_OaksLabReceivedText"
+            and type(row[3]) == "table" and row[3].RAM == "PIKACHU" then
+          local subs = {}
+          for k, v in pairs(row[3]) do subs[k] = v end
+          subs.RAM = name
+          out[i] = { row[1], row[2], subs }
+        else
+          out[i] = row
+        end
+      end
+      return out
+    end
+    mod.content.map_scripts:register("OAKS_LAB", {
+      talk = {
+        TEXT_OAKSLAB_EEVEE_POKE_BALL = function(game, ow, npc, done)
+          local runner = ow and ow.runner
+          if type(runner) ~= "table" or type(runner.run) ~= "function" then
+            return giveBall(game, ow, npc, done)
+          end
+          -- the handler hands its rows to ow.runner:run straight away, so
+          -- the runner is wrapped for just this call
+          local own = rawget(runner, "run")
+          local run = runner.run
+          rawset(runner, "run", function(self, rows, opts)
+            rawset(runner, "run", own)
+            return run(self, renamed(game, rows), opts)
+          end)
+          local ok, err = pcall(giveBall, game, ow, npc, done)
+          if rawget(runner, "run") ~= own then rawset(runner, "run", own) end
+          if not ok then error(err, 0) end
+        end,
+      },
+    })
+  else
+    mod.log:warn("can't find Oak's Lab script; Oak names the partner PIKACHU")
+  end
+
+  -- After give_pokemon, the engine fills the next "@" blank (the nickname
+  -- question) with the given species' id rather than its name.  In the cart
+  -- it's the name (wStringBuffer), and with Clefairy in the PIKACHU slot the
+  -- two differ, so the id is turned into the name just before it's shown.
+  local okCmd, Commands = pcall(require, "src.script.Commands")
+  if okCmd and type(Commands) == "table" and type(Commands.show_text) == "function"
+      and not Commands.__pinkMonName then
+    Commands.__pinkMonName = true
+    local showText = Commands.show_text
+    Commands.show_text = function(ctx, textId, subs, ...)
+      local id = type(ctx) == "table" and ctx.pendingPokemonName
+      if type(id) == "string" and type(subs) == "table" and subs.RAM ~= nil then
+        local data = ctx.game and ctx.game.data
+        local mon = data and data.pokemon and data.pokemon[id]
+        if type(mon) == "table" and type(mon.name) == "string" then
+          ctx.pendingPokemonName = mon.name
+        end
+      end
+      return showText(ctx, textId, subs, ...)
+    end
+  else
+    mod.log:warn("can't reach the script text; the nickname question may name the partner PIKACHU")
+  end
+
   -- Pink's fix for the Route 16 sign on the Route 17 boundary: in the cart
   -- you can't read a sign on the map you're facing into, so Pink repeats it
   -- just past Route 17's top edge (5, -1), readable from (5, 0) facing up.
