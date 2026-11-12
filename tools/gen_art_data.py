@@ -63,6 +63,31 @@ NEW_SPRITES = [
 FRAME_SPRITES = [("sprites/pink_busybody.png", "manga_blue"), ("sprites/pink_yellow.png", "manga_yellow")]
 # Pink's edits of sheets Yellow already has
 YELLOW_SPRITES = ["agatha", "bruno", "lance", "lorelei", "giovanni"]
+# engine cache path, Pink's pret file, battle-style transparency
+# (trim: the cart drops the sheet's trailing blank tiles, so the importer
+# reads whatever follows there; those tiles keep the player's own bytes)
+SHEETS = [
+    ("trainer_card/badges.png", "trainer_card/badges.png", False, False),
+    ("townmap/tiles.png", "town_map/town_map.png", False, False),
+    ("slots/red_slots_1.png", "slots/slots_1.png", False, True),
+    ("slots/red_slots_2.png", "slots/slots_2.png", False, False),
+    ("sprites/surfing_pikachu.png", "sprites/surfing_pikachu.png", False, False),
+    ("minigame/surf_1b.png", "surfing_pikachu/surfing_pikachu_1b.png", False, False),
+    ("minigame/surf_1c.png", "surfing_pikachu/surfing_pikachu_1c.png", False, True),
+    ("minigame/hiscore_tiles.png", "surfing_pikachu/surfing_pikachu_2.png", False, False),
+]
+
+
+def untrimmed(pink_img, base_img):
+    """Pink's sheet as the importer sees it: trailing blank tiles keep the base"""
+    out = pink_img.copy()
+    h, w = out.shape
+    cells = [(y, x) for y in range(0, h, 8) for x in range(0, w, 8)]
+    for y, x in reversed(cells):
+        if (pink_img[y:y + 8, x:x + 8] != 3).any():
+            break
+        out[y:y + 8, x:x + 8] = base_img[y:y + 8, x:x + 8]
+    return out
 # a patch bigger than this share of the picture is a redraw, not an edit
 REDRAW = 0.5
 
@@ -92,6 +117,38 @@ def lua(v, ind=0):
     return str(int(v))
 
 
+def encode_patch(target, mask):
+    """the changed pixels: index/shade pairs, or for heavy edits a grid string
+    ('.' keeps the base pixel, '0'-'3' sets a shade)"""
+    h, w = target.shape
+    changed = np.argwhere(mask)
+    if len(changed) * 2 * 4 < w * h:  # pairs are smaller
+        patch = []
+        for y, x in changed:
+            patch += [int(y) * w + int(x), int(target[y, x])]
+        return {"patch": patch}
+    grid = np.where(mask, target.astype(np.int16) + ord("0"), ord(".")).astype(np.uint8)
+    return {"patch": [], "grid": grid.tobytes().decode("ascii")}
+
+
+def write_png(path, target, alpha=None):
+    rgba = np.zeros(target.shape + (4,), dtype=np.uint8)
+    rgba[..., 0] = rgba[..., 1] = rgba[..., 2] = LEVELS[target]
+    rgba[..., 3] = 255 if alpha is None else alpha.astype(np.uint8) * 255
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    Image.fromarray(rgba, "RGBA").save(path, optimize=True)
+
+
+def rle_town_map(path):
+    """gfx/town_map/town_map.rle: high nibble tile, low nibble count; 0 ends"""
+    out = []
+    for b in open(path, "rb").read():
+        if b == 0:
+            break
+        out += [b >> 4] * (b & 0x0F)
+    return out
+
+
 def main():
     pink, base_root, install, out_path = sys.argv[1:5]
     cache = lambda game, rel: os.path.join(install, game, "assets/generated", rel)
@@ -116,14 +173,13 @@ def main():
         changed = np.argwhere(ref != target)
         if len(changed) > REDRAW * w * h:
             raise SystemExit("%s: %d of %d pixels changed: a redraw, not an edit" % (out, len(changed), w * h))
-        patch = []
-        for y, x in changed:
-            patch += [int(y) * w + int(x), int(target[y, x])]
-        jobs.append({"out": out, "parts": frames, "size": [w, h], "patch": patch})
+        rec = {"out": out, "parts": frames, "size": [w, h]}
+        rec.update(encode_patch(target, ref != target))
+        jobs.append(rec)
         return len(changed), w * h
 
-    def job(out, pink_png, bases, matte=False, extra=None):
-        target = shades(pink_png)
+    def job(out, pink_png, bases, matte=False, extra=None, limit=REDRAW):
+        target = shades(pink_png) if isinstance(pink_png, str) else pink_png
         found = [(g, rel) for g, rel in bases if os.path.exists(cache(g, rel))]
         if not found:
             raise SystemExit("%s: no import has %s" % (out, bases))
@@ -140,13 +196,10 @@ def main():
         mapped = np.array(perm)[ref]
         h, w = target.shape
         changed = np.argwhere(mapped != target)
-        if len(changed) > REDRAW * w * h:
+        if len(changed) > limit * w * h:
             raise SystemExit("%s: %d of %d pixels changed: a redraw, not an edit" % (out, len(changed), w * h))
-        patch = []
-        for y, x in changed:
-            patch += [int(y) * w + int(x), int(target[y, x])]
-        rec = {"out": out, "bases": [{"game": g, "rel": r} for g, r in bases],
-               "size": [w, h], "patch": patch}
+        rec = {"out": out, "bases": [{"game": g, "rel": r} for g, r in bases], "size": [w, h]}
+        rec.update(encode_patch(target, mapped != target))
         if tuple(perm) != (0, 1, 2, 3):
             rec["perm"] = list(perm)
         if matte:
@@ -182,6 +235,82 @@ def main():
             n, total = job("%s/%s" % (sub, fn), os.path.join(d_p, fn), [("yellow", "%s/%s" % (sub, fn))], matte=True)
             report.append("%s %d/%d" % (fn, n, total))
 
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import pikapic, title as titlemod
+    mod_dir = os.path.dirname(os.path.abspath(out_path))
+    over = os.path.join(mod_dir, "overrides")
+    if os.path.isdir(over):
+        import shutil
+        shutil.rmtree(over)
+    files = []
+
+    # sheets the engine imports as they are
+    seen = {}
+    for out, rel, matte, trim in SHEETS:
+        target = shades(os.path.join(pink, "gfx", rel))
+        if trim:
+            target = untrimmed(target, shades(cache("yellow", out)))
+        seen[out] = target
+        if open(os.path.join(pink, "gfx", rel), "rb").read() == open(os.path.join(base_root, "gfx", rel), "rb").read():
+            continue
+        n, total = job(out, target, [("yellow", out)], matte=matte, limit=1.0)
+        report.append("%s %d/%d" % (out, n, total))
+
+    # the Surfing minigame's title screen and paddling frames, recomposed
+    # from Pink's tiles and title tilemap
+    import surfing
+    for name, (img, alpha) in surfing.compose(pink, seen["minigame/surf_1c.png"]).items():
+        rel = "minigame/" + name
+        base = shades(cache("yellow", rel))
+        if np.array_equal(base, img):
+            continue
+        n, total = job(rel, img, [("yellow", rel)], limit=1.0)
+        report.append("%s %d/%d" % (rel, n, total))
+
+    # the bolt emote: one 16x16 cell of the emote strip
+    emotes = shades(cache("yellow", "emotes.png"))
+    bolt = shades(os.path.join(pink, "gfx/emotes/bolt.png"))
+    target = emotes.copy()
+    target[0:16, 80:96] = bolt
+    n, total = job("emotes.png", target, [("yellow", "emotes.png")], limit=1.0)
+    report.append("emotes.png %d/%d" % (n, total))
+
+    # title screen: the logo and speech bubble are edits of Yellow's; the
+    # Clefairy and its blink overlays are Pink's own drawing and ship
+    pieces = titlemod.compose(pink)
+    title_shift = pieces.pop("shift")
+    for name, (img, alpha) in pieces.items():
+        target = (3 - img).astype(np.int8)  # title.py counts colours, white first
+        rel = "title/" + name
+        if name in ("pokemon_logo.png", "pika_bubble.png"):
+            n, total = job(rel, target, [("yellow", rel)], matte=(name == "pika_bubble.png"), limit=1.0)
+            report.append("%s %d/%d" % (rel, n, total))
+        else:
+            write_png(os.path.join(over, rel), target, alpha)
+            files.append(rel)
+
+    # partner portraits: Pink's (adapting Artsy-Theo's) over Yellow's frames;
+    # mostly-new pictures ship, the rest are edits
+    vanilla = pikapic.compose_all(base_root)
+    for name, canvas in sorted(pikapic.compose_all(pink).items()):
+        rel = "pikachu/" + name
+        if np.array_equal(canvas, vanilla.get(name)):
+            continue
+        frac = float((canvas != vanilla[name]).mean()) if name in vanilla else 1.0
+        if frac <= REDRAW and os.path.exists(cache("yellow", rel)):
+            n, total = job(rel, canvas, [("yellow", rel)], matte=True)
+            report.append("%s %d/%d" % (rel, n, total))
+        else:
+            write_png(os.path.join(over, rel), canvas, pikapic.matte(canvas).astype(bool))
+            files.append(rel)
+
+    # the town map's layout (town_map.rle), as the engine's tile list
+    town = rle_town_map(os.path.join(pink, "gfx/town_map/town_map.rle"))
+    town_base = rle_town_map(os.path.join(base_root, "gfx/town_map/town_map.rle"))
+    if len(town) != len(town_base):
+        raise SystemExit("town map: %d cells, vanilla has %d" % (len(town), len(town_base)))
+    town_changes = {i + 1: t for i, (a, t) in enumerate(zip(town_base, town)) if a != t}
+
     # which object each leader is: the line using Pink's new sprite
     def leader_object(gym, pink_name):
         label = "".join(w.capitalize() for w in gym.split("_"))
@@ -200,8 +329,14 @@ def main():
         f.write("-- Pokemon Pink's sprite and picture edits (by jcferggy), as changes to the\n")
         f.write("-- player's own imported art: only the pixels Pink changed are listed.\n")
         f.write("return {\n  jobs = " + lua(jobs, 1) + ",\n")
+        f.write("  -- Pink's own drawings, shipped in overrides/\n")
+        f.write("  files = " + lua(sorted(files), 1) + ",\n")
+        f.write("  -- Pink's title Clefairy starts a tile left of Yellow's Pikachu\n")
+        f.write("  titleShift = %d,\n" % title_shift)
+        f.write("  -- town map cells Pink changed (1-based, 20 x 18 tiles)\n")
+        f.write("  townMap = " + lua(town_changes, 1) + ",\n")
         f.write("}\n")
-    print("jobs:", len(jobs))
+    print("jobs:", len(jobs), "| files:", len(files), "| town map cells:", len(town_changes))
     print("  " + ", ".join(report))
     for n in notes:
         print("note:", n)

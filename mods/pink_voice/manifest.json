@@ -1,0 +1,25 @@
+{
+  "id": "pink_voice",
+  "name": "Pink Voice",
+  "version": "0.2.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "AUDIO",
+  "priority": 113,
+  "dependencies": [
+    "pink_partner@>=0.2.0"
+  ],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "incompatible": [],
+  "games": [
+    "yellow"
+  ],
+  "permissions": [
+    "engine_internals"
+  ],
+  "experimental": true,
+  "description": "Pokemon Pink's Clefairy voice clips in place of Yellow's Pikachu clips."
+}

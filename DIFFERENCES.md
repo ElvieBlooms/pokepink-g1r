@@ -123,7 +123,34 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   pictures.
 - The Busybody and manga Yellow overworld sheets, built frame by frame from
   Yellow's sheets plus Pink's pixels.
+- Pink's partner emotion portraits (62 pictures, composed the way the importer
+  composes Yellow's, from Pink's tiles), badges, town map tiles and the 22 town
+  map cells Pink redraws, slot reels, the surfing overworld sprite, the
+  Surfing minigame's sheets, title ("Clefairy's Beach") and paddling frames,
+  and the bolt emote. All checked pixel for pixel against compositions of
+  Pink's own files.
+- Title screen: Pink's logo ("PINK VERSION", "Clefa!") and Clefairy with its
+  blink. Pink's Clefairy sits one tile left of Yellow's Pikachu, and the
+  engine has no setting for that spot, so the title's draw is wrapped to move
+  the picture and blink overlays 8 pixels left.
+- Oak's speech: the partner preview uses the PINKMON palette (Pink's
+  SET_PAL_CLEFAIRY).
+- The partner's happy mood on learning a move comes from Metronome and
+  Psychic instead of Thunderbolt and Thunder, and the "thunderbolt" portrait
+  plays Psychic's sound, as in Pink.
 - Written to `save/mod-derived/pink_presentation/`; needs `engine_internals`.
+- Party icons: one per Pokémon, as in Pink, but from the Minidex 001-251
+  (colour Game Boy icons, the set Facets uses) rather than Pink's own grey
+  icons, whose source isn't known. A PARTY ICONS option switches back to the
+  game's shared icons, and an icon chosen by another mod (Facets) wins.
+- Not ported yet: Pink's intro (the engine's intro has Yellow's sprite layouts
+  built in, and Pink rearranges them for Clefairy) and the Super Game Boy
+  border (a Skin Studio canvas, not something mods set).
+
+## pink_voice
+- Pink's 42 Clefairy voice clips play wherever Yellow plays its recorded
+  Pikachu clips (same numbering). The engine's clip loader is wrapped to open
+  the mod's files; needs `engine_internals`.
 
 ## pink_tilesets
 - Nine tileset sheets rebuilt at startup (Overworld, Forest, Facility, Gate,
