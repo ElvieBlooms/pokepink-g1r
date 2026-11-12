@@ -17,7 +17,13 @@ six maps, walks up, battles you and moves on:
 | Pokémon Mansion 1F | CHIEF party 5 |
 | Victory Road 3F | CHIEF party 6 |
 
-Lose and he'll catch you again; beat him and he's gone for good.
+Lose and he'll catch you again; beat him and he heads to **Cerulean's Trashed
+House**, where he waits for a rematch with the same team. Only the last one
+you beat is there. Beat the Champion and his final team (CHIEF party 7)
+takes his place.
+
+The rematch trainers' headers are added to the loaded game data at startup,
+so this mod needs the `engine_internals` permission.
 
 Known differences from Pink:
 - Pink plays Yellow's unused song for these encounters. The engine doesn't
@@ -25,8 +31,7 @@ Known differences from Pink:
 - His line for when he beats you isn't shown: the engine's scripted battles
   only take the line for when he loses.
 
-Still to come: the Trashed House rematches, the Imposter at the beach house,
-and Mew in Cerulean Cave.
+Still to come: the Imposter at the beach house and Mew in Cerulean Cave.
 
 ## Credits
 

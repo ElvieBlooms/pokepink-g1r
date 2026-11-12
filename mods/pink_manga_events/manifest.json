@@ -19,5 +19,8 @@
     "yellow"
   ],
   "experimental": true,
-  "description": "Pokemon Pink's manga events: the Busybody who challenges you around Kanto."
+  "description": "Pokemon Pink's manga events: the Busybody who challenges you around Kanto, and his rematches in Cerulean.",
+  "permissions": [
+    "engine_internals"
+  ]
 }

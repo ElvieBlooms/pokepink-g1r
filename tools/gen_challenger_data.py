@@ -92,6 +92,12 @@ def parse(root, label):
         raise SystemExit(f"{label}: no beat flag")
     out["beatFlag"] = bf.group(1)
 
+    # the Trashed House Busybody this challenger's exit script shows
+    shown = re.findall(r"ld a, TOGGLE_CERULEANTRASHEDHOUSE_CHIEF_(\d)\n\s*ld \[wToggleableObjectIndex\], a\n\s*predef ShowObject", text)
+    if len(shown) != 1:
+        raise SystemExit(f"{label}: expected one Trashed House Busybody shown, got {shown}")
+    out["houseShows"] = int(shown[0])
+
     # music
     mu = re.search(r"ld a, (MUSIC_\w+)\n\s*call PlayMusic", text)
     out["music"] = mu.group(1) if mu else None
@@ -149,9 +155,38 @@ def main():
         print("%-29s cells %-2d party %-2d flag %-34s exit %-24s step %-5s obj (%d,%d) %s"
               % (mapid, len(rec["coords"]), rec["party"], rec["beatFlag"], ",".join(rec["exit"]),
                  rec["playerStep"], rec["object"]["x"], rec["object"]["y"], rec["object"]["facing"]))
+    # Cerulean's Trashed House: seven CHIEF trainers on one tile, one shown at a time
+    obj_text = open(os.path.join(root, "data/maps/objects/CeruleanTrashedHouse.asm")).read()
+    house = []
+    for x, y, facing, n, party in re.findall(
+            r"object_event\s+(\d+),\s*(\d+),\s*SPRITE_CHIEF,\s*STAY,\s*(\w+),\s*TEXT_CERULEANTRASHEDHOUSE_CHIEF(\d),\s*OPP_CHIEF,\s*(\d+)", obj_text):
+        house.append({"n": int(n), "x": int(x), "y": int(y), "facing": facing.lower(), "party": int(party)})
+    script = open(os.path.join(root, "scripts/CeruleanTrashedHouse.asm")).read()
+    for h in house:
+        m = re.search(r"trainer (EVENT_BEAT_CERULEANTRASHEDHOUSE_TRAINER_%d), (\d+), CeruleanTrashedHouseChief%dBattleText" % (h["n"] - 1, h["n"]), script)
+        if not m:
+            raise SystemExit("Trashed House Busybody %d: no trainer header" % h["n"])
+        h["event"], h["range"] = m.group(1), int(m.group(2))
+        h["text"] = {k: "_CeruleanTrashedHouseChief%d%sText" % (h["n"], k) for k in ("Battle", "EndBattle", "AfterBattle")}
+    if len(house) != 7:
+        raise SystemExit("expected seven Trashed House Busybodies, got %d" % len(house))
+    for mapid, rec in data.items():
+        if rec["houseShows"] != rec["party"]:
+            print("note: %s shows house Busybody %d (its party is %d)" % (mapid, rec["houseShows"], rec["party"]))
+    champ = open(os.path.join(root, "scripts/ChampionsRoom.asm")).read()
+    champ_shows = re.findall(r"TOGGLE_CERULEANTRASHEDHOUSE_CHIEF_(\d)\n\s*ld \[wToggleableObjectIndex\], a\n\s*predef ShowObject", champ)
+    if champ_shows != ["7"]:
+        raise SystemExit("Champion's Room shows %s, expected house Busybody 7" % champ_shows)
+    print("house:", [(h["n"], h["party"], h["event"], h["range"]) for h in house], "| Champion shows 7")
+
     # Pink's lines for these encounters (Pokemon Pink by jcferggy)
     labels = load_labels(root)
     strings = {}
+    for h in house:
+        for k in h["text"].values():
+            if k not in labels:
+                raise SystemExit(f"text {k} isn't plain text the converter handles")
+            strings[k] = labels[k]
     for rec in data.values():
         for k in rec["text"].values():
             if k not in labels:
@@ -172,7 +207,7 @@ def main():
         for k in sorted(strings):
             f.write("  %s = %s,\n" % (k, lua_str(strings[k])))
         f.write("}\n")
-        f.write("return { maps = " + lua(data) + ", text = strings }\n")
+        f.write("return { maps = " + lua(data) + ", house = " + lua(house) + ", championShows = 7, text = strings }\n")
     print("lines:", len(strings))
 
 

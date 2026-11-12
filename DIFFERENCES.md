@@ -58,6 +58,12 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   Safari Zone West, Pokémon Mansion 1F, Victory Road 3F): Pink's trigger cells,
   approach and exit paths, lines and CHIEF parties 1-6. Lose and he comes back;
   beat him and his EVENT_BEAT_..._CHIEF flag is set.
+- Cerulean's Trashed House gets seven hidden Busybody trainers on one tile
+  (5, 1), with Pink's sight range (5), beaten flags and lines. Beating a
+  challenger shows his house Busybody (same team) for a rematch and hides the
+  others; beating the Champion leaves the seventh (CHIEF party 7). Their trainer
+  headers are written into the loaded data on `game.ready` (no registry), so the
+  mod needs `engine_internals`.
 - Differences from Pink: the rival's encounter theme stands in for Yellow's
   unused song (not imported by the engine), and his line for beating you isn't
   shown (scripted battles only take the losing line).
