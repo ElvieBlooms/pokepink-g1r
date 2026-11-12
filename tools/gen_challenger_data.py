@@ -13,6 +13,11 @@ template.  This pulls, for each map:
   object     his object_event: x, y, facing
   text ids   Chief / WaitedHere / Defeated / Victory / GoodLuckToYou
 and fails loudly if a script doesn't match the template.
+
+It also pulls the Summer Beach House manga scene (the IMPOSTER who turns
+out to be manga Yellow, the surfing Clefairy and the visiting Pikachu),
+the Champion's Room lines that open it up, and Cerulean Cave's Mew (its
+species and level, and the OT name and ID Pink's add_mon.asm gives it).
 """
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -117,6 +122,69 @@ def parse(root, label):
     return out
 
 
+# Pink keeps vanilla species constants; the port swaps the Pikachu and
+# Clefairy slots (see pink_partner), so a constant Pink names maps here
+SWAP = {"PIKACHU": "CLEFAIRY", "CLEFAIRY": "PIKACHU", "RAICHU": "CLEFABLE", "CLEFABLE": "RAICHU"}
+
+
+def parse_beach(root):
+    objs = open(os.path.join(root, "data/maps/objects/SummerBeachHouse.asm")).read()
+    names = re.findall(r"const_export SUMMERBEACHHOUSE_(\w+)", objs)
+    events = re.findall(r"object_event\s+(\d+),\s*(\d+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(TEXT_\w+)(?:,\s*(\w+),\s*(\d+))?", objs)
+    objects = {}
+    for name, (x, y, sprite, movement, rng, text, cls, party) in zip(names, events):
+        o = {"x": int(x), "y": int(y), "sprite": sprite, "movement": movement,
+             "range": {"1": "UP_DOWN", "2": "LEFT_RIGHT", "0": "ANY_DIR"}.get(rng, rng), "text": text}
+        if cls:
+            o["trainerClass"], o["trainerParty"] = cls, int(party)
+        objects[name] = o
+    for need in ("IMPOSTER", "YELLOW", "SURFINDUDE", "PIKACHU", "FAIRY"):
+        if need not in objects:
+            raise SystemExit("Summer Beach House: no %s object" % need)
+    script = open(os.path.join(root, "scripts/SummerBeachHouse.asm")).read()
+    hm = re.search(r"trainer (EVENT_\w+), (\d+), SummerBeachHouseImposterBattleText, "
+                   r"SummerBeachHouseImposterEndBattleText, SummerBeachHouseImposterAfterBattleText", script)
+    rm = re.search(r"SetEvent (EVENT_REVEAL_\w+)", script)
+    if not (hm and rm):
+        raise SystemExit("Summer Beach House: no trainer header / reveal flag")
+    # the revealed Yellow turns to face the player from these cells
+    coords = [[int(a), int(b)] for a, b in re.findall(r"dbmapcoord\s+(\d+),\s*(\d+)", script)]
+    order = re.findall(r"\.movement\d\n\s*ld a, SUMMERBEACHHOUSE_YELLOW\n\s*ldh \[hSpriteIndex\], a\n\s*ld a, SPRITE_FACING_(\w+)", script)
+    if len(coords) != 3 or len(order) != 3:
+        raise SystemExit("Summer Beach House: unexpected reveal facings %s %s" % (coords, order))
+    cries = {}
+    for who in ("Pikachu", "Fairy"):
+        m = re.search(r"SummerBeachHouse%sText:\n\s*text_asm.*?ld a, (\w+)\n\s*call PlayCry" % who, script, re.S)
+        if not m:
+            raise SystemExit("Summer Beach House: no cry for %s" % who)
+        cries[who.upper()] = SWAP.get(m.group(1), m.group(1))
+    champ = open(os.path.join(root, "scripts/ChampionsRoom.asm")).read()
+    cm = re.search(r"CheckEvent (EVENT_\w+)\n\s*jr nz, \.returning_chap(.*?)SetEvent \1", champ, re.S)
+    shows = re.findall(r"TOGGLE_SUMMER_BEACH_HOUSE_(\w+)\n\s*ld \[wToggleableObjectIndex\], a\n\s*predef ShowObject", cm.group(2)) if cm else []
+    if sorted(shows) != ["FAIRY", "IMPOSTER"]:
+        raise SystemExit("Champion's Room: expected Imposter and Fairy shown once, got %s" % shows)
+    return {
+        "objects": objects, "event": hm.group(1), "range": int(hm.group(2)), "revealFlag": rm.group(1),
+        "faceFrom": [{"x": c[0], "y": c[1], "dir": d.lower()} for c, d in zip(coords, order)],
+        "cries": cries, "championShows": sorted(shows),
+        "text": {"Battle": "_SummerBeachHouseImposterBattleText", "EndBattle": "_SummerBeachHouseImposterEndBattleText",
+                 "AfterBattle": "_SummerBeachHouseImposterAfterBattleText", "Pikachu": "_SummerBeachHousePikachuText",
+                 "Fairy": "_SummerBeachHouseFairyText", "SurfinDude": "_SummerBeachHouseSurfinDudeText1"},
+    }
+
+
+def parse_mew(root):
+    objs = open(os.path.join(root, "data/maps/objects/CeruleanCaveB1F.asm")).read()
+    m = re.search(r"object_event\s+\d+,\s*\d+,\s*SPRITE_MONSTER,\s*\w+,\s*\w+,\s*TEXT_CERULEANCAVEB1F_MEWTWO,\s*(\w+),\s*(\d+)", objs)
+    add = open(os.path.join(root, "engine/pokemon/add_mon.asm")).read()
+    ot = re.search(r'MewOTName:.*?\n\s*db "([^@"]+)@', add)
+    hi = re.search(r"cp MEW\n\s*jr nz, \.normalTrainerID.*?ld a, \$(\w\w)\n\s*inc de\n\s*ld \[de\], a\n\s*ld a, \$(\w\w)", add, re.S)
+    if not (m and ot and hi):
+        raise SystemExit("Cerulean Cave Mew: couldn't read species/OT")
+    return {"species": m.group(1), "level": int(m.group(2)), "ot": ot.group(1),
+            "otId": int(hi.group(1) + hi.group(2), 16)}
+
+
 def lua(v, ind=0):
     pad = "  " * ind
     if isinstance(v, dict):
@@ -192,6 +260,15 @@ def main():
             if k not in labels:
                 raise SystemExit(f"text {k} isn't plain text the converter handles")
             strings[k] = labels[k]
+    beach = parse_beach(root)
+    for k in beach["text"].values():
+        if k not in labels:
+            raise SystemExit(f"text {k} isn't plain text the converter handles")
+        strings[k] = labels[k]
+    mew = parse_mew(root)
+    print("beach house:", {k: (o["x"], o["y"], o["sprite"]) for k, o in beach["objects"].items()},
+          beach["event"], "range", beach["range"], beach["revealFlag"], beach["cries"])
+    print("mew:", mew)
     odd = {k: v for k, v in strings.items() if "{RAM:" in v}
     if odd:
         print("note: lines with RAM placeholders:", list(odd))
@@ -207,7 +284,8 @@ def main():
         for k in sorted(strings):
             f.write("  %s = %s,\n" % (k, lua_str(strings[k])))
         f.write("}\n")
-        f.write("return { maps = " + lua(data) + ", house = " + lua(house) + ", championShows = 7, text = strings }\n")
+        f.write("return { maps = " + lua(data) + ", house = " + lua(house) + ", championShows = 7,\n"
+                "  beach = " + lua(beach, 1) + ",\n  mew = " + lua(mew, 1) + ",\n  text = strings }\n")
     print("lines:", len(strings))
 
 

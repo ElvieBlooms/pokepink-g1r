@@ -20,7 +20,8 @@ These artists have not been contacted directly. jcferggy says he can't speak
 for them, but in his experience they were fine with reuse as long as they are
 credited. Their art is credited here and will be removed on request.
 
-- **jcferggy**: the Busybody's overworld sprite and trainer picture
+- **jcferggy**: the Busybody's overworld sprite and trainer picture, manga
+  Yellow's overworld sprite and the Imposter's trainer picture
   (`mods/pink_manga_events/assets/`), and Pink's dialogue used in the mods.
   Not covered by the MIT license.
 

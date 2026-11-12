@@ -64,9 +64,30 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   others; beating the Champion leaves the seventh (CHIEF party 7). Their trainer
   headers are written into the loaded data on `game.ready` (no registry), so the
   mod needs `engine_internals`.
+- The Busybody is paid as in Pink (base money 6500, was 3000).
 - Differences from Pink: the rival's encounter theme stands in for Yellow's
   unused song (not imported by the engine), and his line for beating you isn't
   shown (scripted battles only take the losing line).
+- Summer Beach House: the Surfin' Dude moves to (3, 3) and the Clefairy to
+  (6, 2), with Pink's "Clefairy knows how to SURF" and "CLEFAIRY: Fairii"
+  lines (Clefairy's cry). Three hidden objects are added: the IMPOSTER (dressed
+  as the player, SPRITE_RED) and manga Yellow on (8, 4), and a Pikachu on
+  (8, 5) ("PIKACHU: Pikaa", Pikachu's cry). The Pikachu borrows the player's
+  imported Pikachu overworld art, since SPRITE_PIKACHU is the Clefairy follower.
+- The first time you beat the Champion, the Imposter and the Pikachu turn up
+  (Pink's EVENT_BEAT_GREEN; here EVENT_PINK_IMPOSTER_ARRIVED). Talking to the
+  Imposter fades the screen, reveals Yellow (EVENT_REVEAL_SUMMERBEACHHOUSE_TRAINER)
+  and starts the battle; walking in front of him (sight range 1) starts it
+  without the reveal, as in Pink.
+- Yellow's unused JUGGLER class becomes IMPOSTER: Pink's trainer picture,
+  base money 9900, move choices 1 and 3, and the final battle theme. Its party
+  (Pikachu 88 and five others) comes from pink_encounters_trainers.
+- Small difference: Pink turns Yellow toward the player from three cells and
+  leaves her facing left otherwise; here she faces the player from any side.
+- Cerulean Cave B1F: Mew L70 replaces Mewtwo (same "Mew!" line, Mewtwo's cry
+  and EVENT_BEAT_MEWTWO, as in Pink). Any Mew you catch gets OT "GF" and ID
+  22796, like Pink's add_mon.asm (Pink does this for Mew added to the party;
+  here a Mew sent to the box gets it too).
 
 ## pink_tilesets
 - Nine tileset sheets rebuilt at startup (Overworld, Forest, Facility, Gate,

@@ -1,8 +1,10 @@
 -- Pink Manga Events
 --
--- Pokemon Pink's manga events.  So far: the BUSYBODY (Yellow's unused CHIEF
--- class) who waits for you on six maps, walks up, battles and moves on, then
--- waits in Cerulean's Trashed House for a rematch.
+-- Pokemon Pink's manga events: the BUSYBODY (Yellow's unused CHIEF class)
+-- who waits for you on six maps, walks up, battles and moves on, then waits
+-- in Cerulean's Trashed House for a rematch; after the Champion, the
+-- IMPOSTER at the Summer Beach House (manga Yellow in disguise) and a
+-- visiting Pikachu; and Mew, not Mewtwo, in Cerulean Cave.
 -- challenger_data.lua is generated from Pink's scripts by
 -- tools/gen_challenger_data.py; text, sprites and the trainer picture are
 -- Pokemon Pink's, by jcferggy.
@@ -22,6 +24,7 @@ return function(mod)
   mod.content.trainers:patch("OPP_CHIEF", {
     name = "BUSYBODY",
     pic = mod.assets:path("assets/trainers/busybody.png"),
+    baseMoney = 65, -- Pink pays 6500 x the last mon's level / 100
   })
 
   -- his overworld sprite (six walking frames, like the vanilla walkers)
@@ -33,7 +36,11 @@ return function(mod)
   })
 
   for id, text in pairs(C.text) do
-    mod.content.text:register(id, text)
+    if mod.content.text:get(id) ~= nil then
+      mod.content.text:override(id, text) -- a vanilla line Pink rewrote
+    else
+      mod.content.text:register(id, text)
+    end
   end
 
   -- Pink plays Yellow's unused song here; the engine doesn't import it, so
@@ -124,6 +131,9 @@ return function(mod)
     end
   end)
 
+  -- Pink's EVENT_BEAT_GREEN, under a name of this mod's own
+  local ARRIVED = "EVENT_PINK_IMPOSTER_ARRIVED"
+
   -- Beating the Champion: the last Busybody waits in Cerulean.  This runs
   -- before the engine's own Hall of Fame handler clears pendingHallOfFame.
   mod.content.map_scripts:register("HALL_OF_FAME", {
@@ -133,6 +143,13 @@ return function(mod)
       for _, h in ipairs(C.house) do
         rows[#rows + 1] = { h.n == C.championShows and "show_object" or "hide_object",
                             HOUSE_MAP, houseName(h.n) }
+      end
+      -- the first time only: the Imposter and the Pikachu visit the beach
+      if not mod.world:getFlag(ARRIVED) then
+        for _, key in ipairs(C.beach.championShows) do
+          rows[#rows + 1] = { "show_object", "SUMMER_BEACH_HOUSE", "PINK_SUMMERBEACHHOUSE_" .. key }
+        end
+        rows[#rows + 1] = { "set_flag", ARRIVED }
       end
       mod.world:queueScript(rows)
     end,
@@ -169,4 +186,197 @@ return function(mod)
       })
     end
   end
+
+  -- -------------------------------------------------------------------
+  -- Summer Beach House: after the Champion, the IMPOSTER (dressed as you)
+  -- and a visiting Pikachu turn up.  Talk to him and he's manga Yellow.
+  local B = C.beach
+  local BEACH = "SUMMER_BEACH_HOUSE"
+
+  -- Yellow's unused JUGGLER becomes Pink's IMPOSTER; Pink plays the final
+  -- battle theme for him and gives him smarter move choices
+  mod.content.trainers:patch("OPP_UNUSED_JUGGLER", {
+    name = "IMPOSTER",
+    pic = mod.assets:path("assets/trainers/imposter.png"),
+    baseMoney = 99,
+    aiMods = { 1, 3 },
+    battleTheme = "Music_FinalBattle",
+  })
+
+  mod.content.sprites:override("SPRITE_PINK_YELLOW", {
+    id = "SPRITE_PINK_YELLOW",
+    image = mod.assets:path("assets/sprites/yellow.png"),
+    frames = 6,
+    walker = true,
+  })
+
+  -- the visiting Pikachu: SPRITE_PIKACHU is the Clefairy follower now, so
+  -- borrow the game's own Pikachu art, read from the player's imported data
+  local okT, Transform = pcall(require, "src.mods.AssetTransform")
+  local SOURCE = okT and type(Transform) == "table" and Transform.SOURCE_ROOT
+  local PIKACHU_SPRITE = "SPRITE_CLEFAIRY"
+  if SOURCE then
+    PIKACHU_SPRITE = "SPRITE_PINK_PIKACHU"
+    mod.content.sprites:override(PIKACHU_SPRITE, {
+      id = PIKACHU_SPRITE,
+      image = SOURCE .. "sprites/pikachu.png",
+      frames = 6,
+      walker = true,
+      paletteSource = "SPRITE_PIKACHU",
+    })
+  else
+    mod.log:warn("can't find the imported sprites; the beach house Pikachu borrows Clefairy's")
+  end
+
+  local beach = mod.content.maps:get(BEACH)
+  local beachLabel, impIndex, yellowIndex, fairyIndex
+  if beach then
+    beachLabel = beach.label
+    local objects = {}
+    for i, o in ipairs(beach.objects or {}) do
+      local copy = {}
+      for k, v in pairs(o) do copy[k] = v end
+      -- Pink moves the Surfin' Dude and the Clefairy aside
+      local moved = (o.name == "SUMMERBEACHHOUSE_SURFINDUDE" and B.objects.SURFINDUDE)
+                 or (o.name == "SUMMERBEACHHOUSE_PIKACHU" and B.objects.PIKACHU)
+      if moved then copy.x, copy.y = moved.x, moved.y end
+      objects[i] = copy
+    end
+    local function add(key, fields)
+      local o = B.objects[key]
+      local index = #objects + 1
+      local rec = {
+        index = index, name = "PINK_SUMMERBEACHHOUSE_" .. key,
+        x = o.x, y = o.y, movement = o.movement, range = o.range,
+        text = "TEXT_PINK_SUMMERBEACHHOUSE_" .. key, hidden = true,
+      }
+      for k, v in pairs(fields) do rec[k] = v end
+      objects[index] = rec
+      return index
+    end
+    -- he keeps Pink's trainer header, so he can spot you from one tile away
+    impIndex = add("IMPOSTER", { sprite = "SPRITE_RED",
+      trainerClass = "OPP_UNUSED_JUGGLER", trainerParty = B.objects.IMPOSTER.trainerParty })
+    yellowIndex = add("YELLOW", { sprite = "SPRITE_PINK_YELLOW" })
+    fairyIndex = add("FAIRY", { sprite = PIKACHU_SPRITE })
+    mod.content.maps:patch(BEACH, { objects = objects })
+  else
+    mod.log:warn("no %s; the Imposter is skipped", BEACH)
+  end
+
+  local function name(key) return "PINK_SUMMERBEACHHOUSE_" .. key end
+
+  local function battleRows()
+    return {
+      { "check_flag", B.event },
+      { "jump_if_true", "beaten" },
+      { "show_text", B.text.Battle },
+      { "save_end_battle_text", B.text.EndBattle },
+      { "start_battle", "trainer", "OPP_UNUSED_JUGGLER", B.objects.IMPOSTER.trainerParty },
+      { "jump_if_false", "done" },
+      { "set_flag", B.event },
+      { "jump", "done" },
+      { "label", "beaten" },
+      { "show_text", B.text.AfterBattle },
+      { "label", "done" },
+    }
+  end
+
+  -- the way Yellow turns to you once the disguise drops
+  local function faceToward(ow)
+    local p = ow and ow.player
+    if not p then return "left" end
+    for _, f in ipairs(B.faceFrom) do
+      if p.cellX == f.x and p.cellY == f.y then return f.dir end
+    end
+    local o = B.objects.YELLOW
+    local dx, dy = (p.cellX or o.x) - o.x, (p.cellY or o.y) - o.y
+    if math.abs(dx) >= math.abs(dy) then return dx > 0 and "right" or "left" end
+    return dy > 0 and "down" or "up"
+  end
+
+  if beach then
+    mod.content.map_scripts:register(BEACH, {
+      talk = {
+        TEXT_PINK_SUMMERBEACHHOUSE_IMPOSTER = function(game, ow, npc, done)
+          local rows = {}
+          if not (mod.world:getFlag(B.event) or mod.world:getFlag(B.revealFlag)) then
+            rows = {
+              { "fade", "out" },
+              { "hide_object", BEACH, name("IMPOSTER") },
+              { "show_object", BEACH, name("YELLOW") },
+              { "set_flag", B.revealFlag },
+              { "face_object", yellowIndex, faceToward(ow) },
+              { "fade", "in" },
+            }
+          end
+          for _, r in ipairs(battleRows()) do rows[#rows + 1] = r end
+          ow.runner:run(rows, { npc = npc, onDone = done })
+        end,
+        TEXT_PINK_SUMMERBEACHHOUSE_YELLOW = battleRows(),
+        TEXT_PINK_SUMMERBEACHHOUSE_FAIRY = {
+          { "play_cry", B.cries.FAIRY, true },
+          { "show_text", B.text.Fairy },
+        },
+      },
+    })
+  end
+
+  -- Imposter's sight range and beaten flag, like the Trashed House headers
+  mod.events:on("game.ready", function(ev)
+    local data = ev and ev.game and ev.game.data
+    if not (data and data.trainer_headers and beachLabel and impIndex) then return end
+    local perMap = data.trainer_headers[beachLabel] or {}
+    data.trainer_headers[beachLabel] = perMap
+    perMap[impIndex] = {
+      battle = B.text.Battle, won = B.text.EndBattle, after = B.text.AfterBattle,
+      event = B.event, range = B.range,
+    }
+  end)
+
+  -- -------------------------------------------------------------------
+  -- Cerulean Cave: Mew waits where Mewtwo was, and comes with the OT name
+  -- and ID of an official Game Freak event Mew (Pink's add_mon.asm)
+  local M = C.mew
+  local CAVE = "CERULEAN_CAVE_B1F"
+  local cave = mod.content.maps:get(CAVE)
+  if cave then
+    local objects = {}
+    for i, o in ipairs(cave.objects or {}) do
+      local copy = {}
+      for k, v in pairs(o) do copy[k] = v end
+      if o.name == "CERULEANCAVEB1F_MEWTWO" then
+        copy.pokemon, copy.level = M.species, M.level
+      end
+      objects[i] = copy
+    end
+    mod.content.maps:patch(CAVE, { objects = objects })
+    -- Pink keeps the "Mew!" line and Mewtwo's cry, and the old beaten flag
+    mod.content.map_scripts:register(CAVE, {
+      talk = {
+        TEXT_CERULEANCAVEB1F_MEWTWO = {
+          { "check_flag", "EVENT_BEAT_MEWTWO" },
+          { "jump_if_true", "beaten" },
+          { "play_cry", "MEWTWO", true },
+          { "engage_music", "Music_MeetMaleTrainer" },
+          { "show_text", "_MewtwoBattleText" },
+          { "static_battle", M.species, M.level, "EVENT_BEAT_MEWTWO" },
+          { "jump", "end" },
+          { "label", "beaten" },
+          { "play_cry", "MEWTWO", true },
+          { "show_text", "_MewtwoBattleText" },
+          { "label", "end" },
+        },
+      },
+    })
+  else
+    mod.log:warn("no %s; Mew is skipped", CAVE)
+  end
+
+  mod.events:on("pokemon.caught", function(ev)
+    local mon = ev and ev.mon
+    if mon and (ev.species or mon.species) == M.species then
+      mon.ot, mon.otId = M.ot, M.otId
+    end
+  end)
 end

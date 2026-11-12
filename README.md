@@ -30,7 +30,7 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 | `pink_world_tweaks` | map edits, new Cut trees, Mansion ledges, rooftop Fly, Linking Cable in the Celadon mart, Vermilion Dock item | done, needs playtest |
 | `pink_tilesets` | Pink's tile art: Red/Blue tiles built from the player's own Red/Blue import, Pink's own tiles shipped with credit | done, needs playtest |
 | `pink_palettes` | Pink's recoloured palettes, the new cave and grey palettes, split Geodude/Cubone/Jynx palettes | done, needs playtest |
-| `pink_manga_events` | Busybody challengers and Trashed House rematches (done, need playtest); Imposter, beach house, VC Mew to come | in progress |
+| `pink_manga_events` | Busybody challengers, Trashed House rematches, the beach house Imposter and Pikachu, Mew in Cerulean Cave | verified headlessly, needs playtest |
 | `pink_presentation` | title screen, intro, SGB borders, slots, emotion portraits | planned, waiting on art permissions |
 
 Every mod depends on `pink_partner`: the others refer to Clefairy and Pikachu
