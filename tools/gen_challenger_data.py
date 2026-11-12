@@ -81,6 +81,15 @@ def parse(root, label):
     pdir = re.search(r"ld a, PLAYER_DIR_(\w+)\n\s*ld \[wPlayerMovingDirection\]", after.group(1))
     out["playerFaceAfter"] = pdir.group(1).lower() if pdir else None
 
+    # a Busybody already standing there (Pink's toggle ON) turns first
+    first = re.search(r"Script_Challenger:\n.*?ret nc\n\s*ld a, \w+_CHIEF\n\s*ldh \[hSpriteIndex\], a\n\s*ld a, SPRITE_FACING_(\w+)", text, re.S)
+    out["faceFirst"] = first.group(1).lower() if first else None
+    toggles = open(os.path.join(root, "data/maps/toggleable_objects.asm")).read()
+    tm = re.search(r"toggle_object_state\s+%s_CHIEF,\s*(ON|OFF)" % label.upper(), toggles)
+    if not tm:
+        raise SystemExit(f"{label}: no toggle state for its Busybody")
+    out["startsShown"] = tm.group(1) == "ON"
+
     # the player's forced step when he appears
     step = re.search(r"ld a, PAD_(UP|DOWN|LEFT|RIGHT)\n\s*ld \[wSimulatedJoypadStatesEnd\]", text)
     out["playerStep"] = step.group(1).lower() if step else None
@@ -201,6 +210,8 @@ def lua(v, ind=0):
         return '"%s"' % v
     if v is None:
         return "nil"
+    if isinstance(v, bool):
+        return "true" if v else "false"
     return str(v)
 
 
@@ -220,9 +231,10 @@ def main():
             if not any(re.search(r"^" + re.escape(k) + r"::", t, re.M) for t in ALL_TEXT.values()):
                 raise SystemExit(f"{label}: text {k} not found")
         data[mapid] = rec
-        print("%-29s cells %-2d party %-2d flag %-34s exit %-24s step %-5s obj (%d,%d) %s"
+        print("%-29s cells %-2d party %-2d flag %-34s exit %-24s step %-5s obj (%d,%d) %s%s"
               % (mapid, len(rec["coords"]), rec["party"], rec["beatFlag"], ",".join(rec["exit"]),
-                 rec["playerStep"], rec["object"]["x"], rec["object"]["y"], rec["object"]["facing"]))
+                 rec["playerStep"], rec["object"]["x"], rec["object"]["y"], rec["object"]["facing"],
+                 " shown, turns %s" % rec["faceFirst"] if rec["startsShown"] else ""))
     # Cerulean's Trashed House: seven CHIEF trainers on one tile, one shown at a time
     obj_text = open(os.path.join(root, "data/maps/objects/CeruleanTrashedHouse.asm")).read()
     house = []

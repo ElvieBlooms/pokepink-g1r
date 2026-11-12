@@ -30,6 +30,7 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 | `pink_world_tweaks` | map edits, new Cut trees, Mansion ledges, rooftop Fly, Linking Cable in the Celadon mart, Vermilion Dock item | done, needs playtest |
 | `pink_tilesets` | Pink's tile art: Red/Blue tiles built from the player's own Red/Blue import, Pink's own tiles shipped with credit | done, needs playtest |
 | `pink_palettes` | Pink's recoloured palettes, the new cave and grey palettes, split Geodude/Cubone/Jynx palettes | done, needs playtest |
+| `pink_presentation` | Gym leader and manga sprites, Pink's Elite Four, Giovanni and battle-picture edits, built from your imports; title, intro, portraits and voice to come | in progress |
 | `pink_manga_events` | Busybody challengers, Trashed House rematches, the beach house Imposter and Pikachu, Mew in Cerulean Cave | verified headlessly, needs playtest |
 | `pink_presentation` | title screen, intro, SGB borders, slots, emotion portraits | planned, waiting on art permissions |
 
@@ -44,11 +45,13 @@ mods/<id>/          one folder per mod, exactly what goes in its .zip
 tools/release.py    builds every mod as one lockstep release (runs modkit gates)
 tools/gen_pink_data.py   regenerates pink_encounters_trainers/data.lua and pink_species/species_data.lua
 tools/gen_world_data.py  regenerates pink_world_tweaks/world_data.lua
+tools/gen_text_data.py   regenerates pink_world_tweaks/text_data.lua (Pink's rewritten lines)
 tools/verify_pink.py     loads the mods over an imported Yellow and diffs against Pink
 tools/verify_world.py    the same for map, tileset and field changes
 tools/gen_tile_data.py   regenerates pink_tilesets/tile_data.lua and assets/pink_tiles.png
 tools/gen_palette_data.py regenerates pink_palettes/palette_data.lua
 tools/gen_challenger_data.py regenerates pink_manga_events/challenger_data.lua
+tools/gen_art_data.py    regenerates pink_presentation/art_data.lua (Pink's pixel edits, measured against your imports)
 tools/pret_text.py       converts pret text to the engine's strings (vanilla selftest: 0 differences)
 docs/ROADMAP.md     plan, decisions and known issues
 DIFFERENCES.md      what each mod changes from vanilla Yellow
@@ -77,6 +80,9 @@ python3 tools/gen_pink_data.py path/to/pokeyellow path/to/yellow/data/generated 
 # Pink (also writes mods/pink_species/species_data.lua)
 python3 tools/gen_pink_data.py path/to/pokepink path/to/yellow/data/generated mods/pink_encounters_trainers/data.lua
 python3 tools/gen_world_data.py path/to/pokepink path/to/yellow/data/generated mods/pink_world_tweaks/world_data.lua
+# text and object sprites compare against the pret commit Pink was built on
+# (pokeyellow 3d300551); check it out next to pokepink as "pinkbase"
+python3 tools/gen_text_data.py path/to/pokepink path/to/pinkbase mods/pink_world_tweaks/text_data.lua
 # check the result in-engine
 POKEPORT_DATA_DIR=path/to/yellow/data/generated POKEPORT_VERSION=yellow \
   python3 tools/verify_pink.py path/to/pokepink mods/pink_partner mods/pink_species mods/pink_encounters_trainers

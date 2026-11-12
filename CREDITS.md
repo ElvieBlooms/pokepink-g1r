@@ -20,9 +20,12 @@ These artists have not been contacted directly. jcferggy says he can't speak
 for them, but in his experience they were fine with reuse as long as they are
 credited. Their art is credited here and will be removed on request.
 
-- **jcferggy**: the Busybody's overworld sprite and trainer picture, manga
-  Yellow's overworld sprite and the Imposter's trainer picture
-  (`mods/pink_manga_events/assets/`), and Pink's dialogue used in the mods.
+- **jcferggy**: the Busybody's and the Imposter's trainer pictures
+  (`mods/pink_manga_events/assets/`), Pink's dialogue used in the mods, and
+  Pink's sprite and picture edits (gym leaders, Elite Four, Giovanni, the
+  manga characters, battle pictures), which ship as changed pixels
+  (`mods/pink_presentation/art_data.lua`) and are built over the player's own
+  game art.
   Not covered by the MIT license.
 
 ## Art made for this port

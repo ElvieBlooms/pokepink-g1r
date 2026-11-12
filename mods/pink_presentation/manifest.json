@@ -1,0 +1,23 @@
+{
+  "id": "pink_presentation",
+  "name": "Pink Presentation",
+  "version": "0.2.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "GRAPHICS",
+  "priority": 106,
+  "dependencies": [],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "incompatible": [],
+  "games": [
+    "yellow"
+  ],
+  "permissions": [
+    "engine_internals"
+  ],
+  "experimental": true,
+  "description": "Pokemon Pink's look: gym leader and manga character sprites, Pink's edits to the Elite Four, Giovanni and battle pictures, built from your own imports."
+}

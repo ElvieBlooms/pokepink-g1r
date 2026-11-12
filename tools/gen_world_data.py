@@ -149,6 +149,21 @@ def parse_trades(root):
     return out
 
 
+def parse_object_sprites(root):
+    out = {}
+    d = os.path.join(root, "data/maps/objects")
+    for fn in os.listdir(d):
+        if fn.endswith(".asm"):
+            text = open(os.path.join(d, fn)).read()
+            out[fn[:-4]] = re.findall(r"^\s*object_event\s+\d+,\s*-?\d+,\s*(SPRITE_\w+)", text, re.M)
+    return out
+
+
+def sprite_ids(root):
+    text = open(os.path.join(root, "constants/sprite_constants.asm")).read()
+    return set(re.findall(r"const (SPRITE_\w+)", text))
+
+
 def main():
     root, gen_dir, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
     selftest = "--selftest" in sys.argv
@@ -246,6 +261,25 @@ def main():
     have_trades = [{k: t[k] for k in ("give", "get", "dialogset", "nickname")} for t in imp["trades"]]
     trades_out = trades if trades != have_trades else None
 
+    # ---- object sprites Pink changed (same object, new look).  Compared with
+    # the pret commit Pink was built on; sprites Pink added (the gym leaders)
+    # are pink_presentation's.
+    object_sprites = {}
+    if not selftest:
+        base_root = root.replace("pokepink", "pinkbase")
+        known = sprite_ids(base_root)
+        old_objs = parse_object_sprites(base_root)
+        for label, new in sorted(parse_object_sprites(root).items()):
+            mid, old = by_label.get(label), old_objs.get(label)
+            if not mid or old is None or len(old) != len(new):
+                continue
+            for i, (a, b) in enumerate(zip(old, new)):
+                if a != b:
+                    if b in known:
+                        object_sprites.setdefault(mid, {})[i + 1] = b
+                    else:
+                        notes.append(f"{mid} object {i + 1}: {b} is new in Pink (pink_presentation)")
+
     if selftest:
         print("selftest: %d warp lists, trades %s" % (len(warps), "differ" if trades_out else "match"))
         for k in list(warps)[:5]: print("  warps", k, warps[k], imp["maps"][k].get("warps"))
@@ -263,8 +297,10 @@ def main():
         f.write("return " + json_to_lua({"blocks": blocks, "blockDefs": block_defs,
                                          "walkable": walkable, "cutTrees": cut,
                                          "dungeon": dungeon, "warps": warps,
-                                         "trades": trades_out or []}) + "\n")
-    print("warps:", {k: len(v) for k, v in warps.items()}, "| trades:", len(trades_out or []))
+                                         "trades": trades_out or [],
+                                         "objectSprites": object_sprites}) + "\n")
+    print("warps:", {k: len(v) for k, v in warps.items()}, "| trades:", len(trades_out or []),
+          "| object sprites:", object_sprites)
     print("wrote %s: %d maps (%d cells), blocks in %s, walkable %s, %d cut pairs, "
           "%d dungeon maps + %d ranges"
           % (out_path, len(blocks), sum(len(v) for v in blocks.values()),

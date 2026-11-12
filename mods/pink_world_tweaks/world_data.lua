@@ -307,6 +307,20 @@ return {
       },
     },
   },
+  objectSprites = {
+    CELADON_MANSION_1F = {
+      [1] = "SPRITE_BULBASAUR",
+      [3] = "SPRITE_CLEFAIRY",
+    },
+    COPYCATS_HOUSE_2F = {
+      [3] = "SPRITE_ODDISH",
+      [4] = "SPRITE_SANDSHREW",
+      [5] = "SPRITE_JIGGLYPUFF",
+    },
+    FIGHTING_DOJO = {
+      [1] = "SPRITE_KOGA",
+    },
+  },
   trades = {
     {
       dialogset = 1,

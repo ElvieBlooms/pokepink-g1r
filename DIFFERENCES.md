@@ -10,6 +10,9 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - The partner follower is an animated Clefairy (Anima_nel's sprite, kept in its own colours).
 - Yellow's recorded Pikachu voice clips are off; the partner uses Clefairy's normal cry.
 - Tester option (off by default): one Moon Stone per save.
+- As in Pink, the two overworld sheets swap: SPRITE_CLEFAIRY (the Fan Club pet,
+  Celadon Mansion's and the beach house's Pikachu) shows Pikachu, using the
+  player's imported Pikachu sheet.
 
 ## pink_species
 - Pink's learnsets and TM/HM lists for Clefairy (learns TM39 Swift and HM03 Surf)
@@ -39,6 +42,18 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   Slowpoke (L20, 1600); Raichu (L26, 3200), Dragonair (L28, 5000), Porygon
   (L24, 9100); TMs unchanged. Needs `engine_internals`.
 - A harbor sign on Vermilion Dock (11, 1), with Pink's text.
+- Pink's rewritten lines (53, from `text_data.lua`): Clefairy named where
+  Yellow names Pikachu (Oak's lab, Pewter Gym guide, Museum, Celadon Mansion),
+  Cerulean's Voltorb, the Fan Club's Pikachu, new lines for trainers on Routes
+  6, 8 and 9, Viridian Forest, Mt. Moon and the Fuchsia Gym, and others.
+- Objects with Pink's sprites: Celadon Mansion's Bulbasaur and Pikachu, the
+  Copycat's Oddish, Sandshrew and Jigglypuff dolls, Koga as the Fighting Dojo's
+  Karate Master. The Bulbasaur and the male Nidoran cry as themselves.
+- Officer Jenny gives Charmander and Damian (Route 24) gives Squirtle.
+- After the Champion, the S.S. Anne captain has a new line.
+- Not ported: Pink's fixes to vanilla bugs (Mt. Moon B2F escape warp, the
+  Pewter youngster's sprite, Pokémon Tower 2F's table end) and its extra
+  Route 17 sign off the map's top edge.
 - Dungeon battle intro also on Pokémon Mansion 1F, Victory Road 2F/3F, Power
   Plant, Diglett's Cave, Silph Co. 9F-11F, Seafoam B1F-B4F, Rocket Hideout B1F-B4F.
 
@@ -65,6 +80,9 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   headers are written into the loaded data on `game.ready` (no registry), so the
   mod needs `engine_internals`.
 - The Busybody is paid as in Pink (base money 6500, was 3000).
+- On the Celadon Dept. Store roof he's standing there from the start and turns
+  to you before walking up, as in Pink; talking to any Busybody before he steps
+  up shows his opening line.
 - Differences from Pink: the rival's encounter theme stands in for Yellow's
   unused song (not imported by the engine), and his line for beating you isn't
   shown (scripted battles only take the losing line).
@@ -72,8 +90,8 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   (6, 2), with Pink's "Clefairy knows how to SURF" and "CLEFAIRY: Fairii"
   lines (Clefairy's cry). Three hidden objects are added: the IMPOSTER (dressed
   as the player, SPRITE_RED) and manga Yellow on (8, 4), and a Pikachu on
-  (8, 5) ("PIKACHU: Pikaa", Pikachu's cry). The Pikachu borrows the player's
-  imported Pikachu overworld art, since SPRITE_PIKACHU is the Clefairy follower.
+  (8, 5) ("PIKACHU: Pikaa", Pikachu's cry), on SPRITE_CLEFAIRY as in Pink
+  (pink_partner shows Pikachu on that sheet).
 - The first time you beat the Champion, the Imposter and the Pikachu turn up
   (Pink's EVENT_BEAT_GREEN; here EVENT_PINK_IMPOSTER_ARRIVED). Talking to the
   Imposter fades the screen, reveals Yellow (EVENT_REVEAL_SUMMERBEACHHOUSE_TRAINER)
@@ -88,6 +106,20 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   and EVENT_BEAT_MEWTWO, as in Pink). Any Mew you catch gets OT "GF" and ID
   22796, like Pink's add_mon.asm (Pink does this for Mew added to the party;
   here a Mew sent to the box gets it too).
+
+## pink_presentation
+- Gym leaders use their own overworld sprites (Pink's SPRITE_BROCK and the
+  rest, here SPRITE_PINK_*). Brock, Misty, Surge, Erika, Koga and Blaine are
+  built from the player's Gold, Silver or Crystal import plus Pink's changed
+  pixels; without one they keep Yellow's sprites. Sabrina is built from
+  Yellow's Silph worker sheet.
+- Pink's edited sheets for Agatha, Bruno, Lance, Lorelei and Giovanni, 36 back
+  sprites and the Rattata and Tauros fronts, built from the player's Yellow
+  import plus Pink's changed pixels. Checked pixel for pixel against Pink's
+  pictures.
+- The Busybody and manga Yellow overworld sheets, built frame by frame from
+  Yellow's sheets plus Pink's pixels.
+- Written to `save/mod-derived/pink_presentation/`; needs `engine_internals`.
 
 ## pink_tilesets
 - Nine tileset sheets rebuilt at startup (Overworld, Forest, Facility, Gate,

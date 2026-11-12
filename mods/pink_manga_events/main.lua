@@ -27,10 +27,21 @@ return function(mod)
     baseMoney = 65, -- Pink pays 6500 x the last mon's level / 100
   })
 
-  -- his overworld sprite (six walking frames, like the vanilla walkers)
+  -- Overworld sheets for the Busybody and manga Yellow: Pink drew each frame
+  -- over one of Yellow's own sprites, so pink_presentation builds them from
+  -- the player's import (save/mod-derived/pink_presentation/sprites/).
+  local okT, Transform = pcall(require, "src.mods.AssetTransform")
+  local ROOT = okT and type(Transform) == "table" and Transform.SOURCE_ROOT
+  local function sheet(rel, fallback)
+    if type(ROOT) == "string" then return ROOT .. rel end
+    mod.log:warn("the engine's art root is unavailable; %s stands in", fallback)
+    local rec = mod.content.sprites:get(fallback)
+    return rec and rec.image
+  end
+
   mod.content.sprites:override("SPRITE_PINK_BUSYBODY", {
     id = "SPRITE_PINK_BUSYBODY",
-    image = mod.assets:path("assets/sprites/busybody.png"),
+    image = sheet("sprites/pink_busybody.png", "SPRITE_SUPER_NERD"),
     frames = 6,
     walker = true,
   })
@@ -51,11 +62,16 @@ return function(mod)
 
   local function scene(mapId, rec, objIndex, objName, cell)
     local t = rec.text
-    local rows = {
+    local rows = {}
+    if rec.faceFirst then
+      -- already standing there (the Celadon roof): he turns to look first
+      rows[#rows + 1] = { "face_object", objIndex, rec.faceFirst }
+    end
+    for _, r in ipairs({
       { "play_music", MUSIC },
       { "show_object", mapId, objName },
       { "show_text", t.Intro },
-    }
+    }) do rows[#rows + 1] = r end
     if rec.playerStep then
       rows[#rows + 1] = { "walk_npc", "player", { rec.playerStep } }
     end
@@ -160,7 +176,8 @@ return function(mod)
     if not map then
       mod.log:warn("no map %s; its Busybody is skipped", mapId)
     else
-      -- a hidden Busybody at Pink's spot; the scene shows and hides him
+      -- a Busybody at Pink's spot, hidden until the scene shows him (on the
+      -- Celadon roof he's there from the start, as in Pink)
       local objects = {}
       for i, o in ipairs(map.objects or {}) do objects[i] = o end
       local objIndex = #objects + 1
@@ -169,7 +186,7 @@ return function(mod)
         index = objIndex, name = objName, sprite = "SPRITE_PINK_BUSYBODY",
         x = rec.object.x, y = rec.object.y, movement = "STAY",
         range = rec.object.facing:upper(), -- for STAY objects, range is the facing
-        text = "TEXT_PINK_BUSYBODY", hidden = true,
+        text = "TEXT_PINK_BUSYBODY", hidden = not rec.startsShown,
       }
       mod.content.maps:patch(mapId, { objects = objects })
 
@@ -177,6 +194,8 @@ return function(mod)
       local cells = {}
       for i, c in ipairs(rec.coords) do cells[c[1] .. "," .. c[2]] = i end
       mod.content.map_scripts:register(mapId, {
+        -- talking to him before he steps up: his opening line
+        talk = { TEXT_PINK_BUSYBODY = { { "show_text", rec.text.Intro } } },
         onStep = function(game, ow, x, y)
           local cell = cells[x .. "," .. y]
           if not cell or mod.world:getFlag(rec.beatFlag) then return false end
@@ -205,28 +224,14 @@ return function(mod)
 
   mod.content.sprites:override("SPRITE_PINK_YELLOW", {
     id = "SPRITE_PINK_YELLOW",
-    image = mod.assets:path("assets/sprites/yellow.png"),
+    image = sheet("sprites/pink_yellow.png", "SPRITE_SAFARI_ZONE_WORKER"),
     frames = 6,
     walker = true,
   })
 
-  -- the visiting Pikachu: SPRITE_PIKACHU is the Clefairy follower now, so
-  -- borrow the game's own Pikachu art, read from the player's imported data
-  local okT, Transform = pcall(require, "src.mods.AssetTransform")
-  local SOURCE = okT and type(Transform) == "table" and Transform.SOURCE_ROOT
+  -- the visiting Pikachu keeps Pink's SPRITE_CLEFAIRY: pink_partner swaps
+  -- that sheet to Pikachu, as Pink does
   local PIKACHU_SPRITE = "SPRITE_CLEFAIRY"
-  if SOURCE then
-    PIKACHU_SPRITE = "SPRITE_PINK_PIKACHU"
-    mod.content.sprites:override(PIKACHU_SPRITE, {
-      id = PIKACHU_SPRITE,
-      image = SOURCE .. "sprites/pikachu.png",
-      frames = 6,
-      walker = true,
-      paletteSource = "SPRITE_PIKACHU",
-    })
-  else
-    mod.log:warn("can't find the imported sprites; the beach house Pikachu borrows Clefairy's")
-  end
 
   local beach = mod.content.maps:get(BEACH)
   local beachLabel, impIndex, yellowIndex, fairyIndex

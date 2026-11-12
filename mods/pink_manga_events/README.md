@@ -1,7 +1,8 @@
 # Pink Manga Events
 
-Pokémon Pink's manga events for Gen1Recomp (Yellow). Needs **pink_partner**
-and **pink_encounters_trainers** (whose CHIEF parties these battles use).
+Pokémon Pink's manga events for Gen1Recomp (Yellow). Needs **pink_partner**,
+**pink_encounters_trainers** (whose CHIEF parties these battles use) and
+**pink_presentation** (which builds the Busybody's and Yellow's sprites).
 
 ## Busybody challengers
 
@@ -43,8 +44,8 @@ Lapras, Snorlax, Venusaur, with the final battle theme). Walk right in front
 of him and he'll challenge you without the reveal.
 
 The Surfin' Dude and your Clefairy's stand-in move aside, the Dude now knows
-it's a Clefairy that surfs, and the visiting Pikachu borrows the game's own
-Pikachu overworld art from your imported data.
+it's a Clefairy that surfs, and the visiting Pikachu uses the game's own
+Pikachu overworld art (pink_partner's sheet swap).
 
 ## Mew
 
@@ -59,7 +60,7 @@ Known differences from Pink:
 
 ## Credits
 
-Text, the Busybody overworld sprite (`assets/sprites/busybody.png`) and
-trainer picture (`assets/trainers/busybody.png`), manga Yellow's overworld
-sprite (`assets/sprites/yellow.png`) and the Imposter's trainer picture
-(`assets/trainers/imposter.png`) are from **Pokémon Pink** by **jcferggy**. Not covered by the MIT license.
+Text, the Busybody's trainer picture (`assets/trainers/busybody.png`) and the
+Imposter's (`assets/trainers/imposter.png`) are from **Pokémon Pink** by
+**jcferggy**. Their overworld sprites are Pink's too, built by
+pink_presentation from your own Yellow import. Not covered by the MIT license.

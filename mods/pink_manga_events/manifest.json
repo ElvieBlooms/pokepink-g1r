@@ -10,7 +10,8 @@
   "priority": 111,
   "dependencies": [
     "pink_partner@>=0.2.0",
-    "pink_encounters_trainers@>=0.2.0"
+    "pink_encounters_trainers@>=0.2.0",
+    "pink_presentation@>=0.2.0"
   ],
   "optional_dependencies": [],
   "conflicts": [],

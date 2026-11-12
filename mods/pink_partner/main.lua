@@ -80,6 +80,23 @@ return function(mod)
   -- artist's colours in full-colour mode.  In the Game Boy palette modes the
   -- engine shades sprites by the red channel (>83% is transparent), so each
   -- colour's red value was lowered just enough to land on the right shade.
+  -- Pink swaps the two overworld sheets: SPRITE_CLEFAIRY (the Fan Club pet,
+  -- and the Pikachu Pink puts in Celadon and the beach house) shows Pikachu.
+  -- That art is the game's own, so point at the player's imported Pikachu
+  -- sheet (read before the follower override below replaces the record).
+  -- Yellow's SPRITE_CLEFAIRY has three standing frames; the Pikachu sheet's
+  -- first three are the same three facings.
+  local vanillaPikachu = mod.content.sprites:get("SPRITE_PIKACHU")
+  if vanillaPikachu and vanillaPikachu.image then
+    mod.content.sprites:override("SPRITE_CLEFAIRY", {
+      id = "SPRITE_CLEFAIRY",
+      image = vanillaPikachu.image,
+      frames = 3,
+      walker = false,
+      paletteSource = "SPRITE_PIKACHU",
+    })
+  end
+
   mod.content.sprites:override("SPRITE_PIKACHU", {
     id = "SPRITE_PIKACHU",
     image = mod.assets:path("assets/clefairy_follower.png"),

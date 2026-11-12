@@ -8,7 +8,7 @@
 4b. ~~pink_tilesets~~ (built; composition verified pixel-for-pixel against Pink; needs playtest)
 5. ~~pink_palettes~~ (verified headlessly; needs playtest)
 6. ~~pink_manga_events~~ (Busybody challengers, Trashed House rematches, beach house Imposter, Mew; verified headlessly, needs playtest)
-7. pink_presentation (art permissions first)
+7. pink_presentation: sprites and battle pictures done (verified pixel for pixel against Pink); title, intro, SGB border, slots, town map, badges, portraits, surfing and voice next
 8. Cart release
 
 ## Decisions
