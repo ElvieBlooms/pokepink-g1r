@@ -4,8 +4,9 @@ A port of **Pokémon Pink Version: Special Clefairy Edition**, jcferggy's
 Pokémon Yellow romhack, to [Gen1Recomp](https://github.com/bryanthaboi/gen1recomp),
 rebuilt as a set of mods on top of your own Pokémon Yellow.
 
-> **Status:** early work in progress. Not for distribution until the
-> original author has given permission (see [CREDITS.md](CREDITS.md)).
+> **Status:** work in progress. jcferggy, Pokémon Pink's creator, has given
+> permission for this port as long as credit is given (see [CREDITS.md](CREDITS.md)).
+> To play Pink as originally made, see jcferggy's original release: *(link to add)*.
 
 No ROM, patch, disassembly or ROM-derived art is included. You import your own
 Pokémon Yellow in Gen1Recomp, and these mods rebuild Pink's changes on top of it.
@@ -28,7 +29,7 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 | `pink_world_tweaks` | map edits, new Cut trees, Mansion ledges, rooftop Fly, Linking Cable in the Celadon mart, Vermilion Dock item | done, needs playtest |
 | `pink_tilesets` | Pink's tile art: Red/Blue tiles built from the player's own Red/Blue import, Pink's own tiles shipped with credit | done, needs playtest |
 | `pink_palettes` | Pink's recoloured palettes, the new cave and grey palettes, split Geodude/Cubone/Jynx palettes | done, needs playtest |
-| `pink_manga_events` | Trainers Blue and Yellow, Busybody rematches, Imposter, surfing beach, VC Mew in place of Mewtwo | planned |
+| `pink_manga_events` | Busybody challengers (done, needs playtest); Trashed House rematches, Imposter, surfing beach, VC Mew to come | in progress |
 | `pink_presentation` | title screen, intro, SGB borders, slots, emotion portraits | planned, waiting on art permissions |
 
 Every mod depends on `pink_partner`: the others refer to Clefairy and Pikachu
@@ -46,6 +47,8 @@ tools/verify_pink.py     loads the mods over an imported Yellow and diffs agains
 tools/verify_world.py    the same for map, tileset and field changes
 tools/gen_tile_data.py   regenerates pink_tilesets/tile_data.lua and assets/pink_tiles.png
 tools/gen_palette_data.py regenerates pink_palettes/palette_data.lua
+tools/gen_challenger_data.py regenerates pink_manga_events/challenger_data.lua
+tools/pret_text.py       converts pret text to the engine's strings (vanilla selftest: 0 differences)
 docs/ROADMAP.md     plan, decisions and known issues
 DIFFERENCES.md      what each mod changes from vanilla Yellow
 CREDITS.md          who made what
