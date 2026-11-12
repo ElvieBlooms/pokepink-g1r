@@ -24,7 +24,8 @@ Red, Blue, Yellow, Gold, Silver and Crystal imports.
 | Title logo, speech bubble | Yellow's, edited | built from Yellow's plus Pink's pixels |
 | Title Clefairy and blink overlays | Pink's title art (new drawing) | ships as files in overrides/title/ |
 | Badges, slot reels, town map tiles, bolt emote | Yellow's, edited | built from Yellow's plus Pink's pixels |
-| Intro | Pink rearranges the sprites; the engine's intro layouts are built in | not ported |
+| Intro sheets | Yellow's, edited | built from Yellow's plus Pink's pixels |
+| Intro animation | Pink's frame scripts, layouts, spawn spots (asm) | the intro's sprite steps are wrapped (pink_presentation/intro.lua) |
 | SGB border | Skin Studio canvas in the engine | not ported |
 | Party icons | Pink's per-species grey icons, source unknown | the Minidex 001-251 stands in (shipped with credit, as in Facets) |
 

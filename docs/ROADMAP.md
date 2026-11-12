@@ -8,7 +8,7 @@
 4b. ~~pink_tilesets~~ (built; composition verified pixel-for-pixel against Pink; needs playtest)
 5. ~~pink_palettes~~ (verified headlessly; needs playtest)
 6. ~~pink_manga_events~~ (Busybody challengers, Trashed House rematches, beach house Imposter, Mew; verified headlessly, needs playtest)
-7. ~~pink_presentation~~ and ~~pink_voice~~ (verified headlessly, needs playtest). Open: intro, SGB border
+7. ~~pink_presentation~~ and ~~pink_voice~~ (verified headlessly, needs playtest). Open: SGB border
 8. Cart release
 
 ## Decisions
@@ -91,9 +91,9 @@ party number.
   `db CLASS, id` header (Abra: Psywave, Kinesis, Thunder Wave, Tri Attack).
   The ROM reads it as noise, so no trainer gets those moves; the port matches.
   Ask jcferggy which trainer it was meant for.
-- Pink's intro: the engine's YellowIntro keeps Yellow's sprite layouts in
-  local tables, so Pink's rearranged Clefairy intro can't be expressed by a
-  mod. Needs the engine to read the intro's OAM layouts from data.
+- Pink's intro wraps YellowIntro's new/spawn/updateObjects/drawObjects/
+  startScene (engine_internals). If the engine renames them, the mod logs a
+  warning and Yellow's intro plays.
 - Pink's SGB border: the engine's border is a Skin Studio canvas, not a mod
   surface.
 - Pink's own per-species party icons (gfx/icons/party_mon_sprites.png) have an

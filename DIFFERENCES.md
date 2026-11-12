@@ -143,9 +143,16 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   (colour Game Boy icons, the set Facets uses) rather than Pink's own grey
   icons, whose source isn't known. A PARTY ICONS option switches back to the
   game's shared icons, and an icon chosen by another mod (Facets) wins.
-- Not ported yet: Pink's intro (the engine's intro has Yellow's sprite layouts
-  built in, and Pink rearranges them for Clefairy) and the Super Game Boy
-  border (a Skin Studio canvas, not something mods set).
+- The intro: Pink's sheets and its animated sprites over the engine's Yellow
+  intro. The engine keeps the scenes, timers, music, scrolling, strobes,
+  skip and title hand-off; the mod takes over the sprite steps (spawn,
+  movement and frame scripts, drawing) with Pink's frame scripts, layouts and
+  spawn spots, and sets up the three scenes Pink changed (the second and
+  third runs' spots, and the close-up a tile left with its new object). Data
+  from Pink's asm (`intro_data.lua`, tools/gen_intro_data.py); with Yellow's
+  data the same code replays the engine's intro frame for frame.
+- Not ported yet: the Super Game Boy border (a Skin Studio canvas, not
+  something mods set).
 
 ## pink_voice
 - Pink's 42 Clefairy voice clips play wherever Yellow plays its recorded

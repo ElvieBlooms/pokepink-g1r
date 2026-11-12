@@ -75,6 +75,8 @@ SHEETS = [
     ("minigame/surf_1b.png", "surfing_pikachu/surfing_pikachu_1b.png", False, False),
     ("minigame/surf_1c.png", "surfing_pikachu/surfing_pikachu_1c.png", False, True),
     ("minigame/hiscore_tiles.png", "surfing_pikachu/surfing_pikachu_2.png", False, False),
+    ("intro/yellow_intro_1.png", "intro/yellow_intro_1.png", False, False),
+    ("intro/yellow_intro_2.png", "intro/yellow_intro_2.png", False, False),
 ]
 
 

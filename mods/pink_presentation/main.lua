@@ -17,8 +17,9 @@
 -- in overrides/title/.
 --
 -- Needs engine_internals: src.import.CacheFs reads the other games'
--- imports, the battle-picture matte is the importer's own, and the title
--- screen's draw is wrapped to put Pink's Clefairy in its place.
+-- imports, the battle-picture matte is the importer's own, the title
+-- screen's draw is wrapped to put Pink's Clefairy in its place, and the
+-- intro's sprite steps are Pink's (intro.lua).
 
 return function(mod)
   local function own(path)
@@ -38,14 +39,32 @@ return function(mod)
     return
   end
 
-  -- Building needs images and a writable save folder; headless tools
-  -- (modkit) have neither, so they only see the records below.
-  local canBuild = love and love.image and love.filesystem and love.filesystem.write
+  -- Building needs images and the engine's cache; headless tools (modkit)
+  -- have neither, so they only see the records below.  A mod's own
+  -- love.filesystem is a stand-in whose writes go to the mod's private
+  -- storage, where the asset resolver never looks, so the pictures are
+  -- read and written through the engine's cache (CacheFs, engine_internals)
+  -- into save/mod-derived/<id>/, the folder Assets.resolve serves.
   local okFs, CacheFs = pcall(require, "src.import.CacheFs")
   local okW, ImageWriter = pcall(require, "src.import.ImageWriter")
-  if canBuild and not (okFs and type(CacheFs) == "table" and type(CacheFs.readAt) == "function") then
-    mod.log:warn("CacheFs is unavailable; Pink's sprites are not built")
+  local okA, Assets = pcall(require, "src.render.Assets")
+  local canBuild = love and love.image and true or false
+  if canBuild and not (okFs and type(CacheFs) == "table" and type(CacheFs.readAt) == "function"
+      and type(CacheFs.write) == "function" and okA and type(Assets) == "table"
+      and type(Assets.exists) == "function") then
+    mod.log:warn("the engine's cache is unavailable; Pink's pictures are not built")
     canBuild = false
+  end
+
+  -- CacheFs.prefix is the active game's folder for some callers; the
+  -- derived folder sits at the cache root, so it's cleared around each call
+  local function atRoot(fn, ...)
+    local saved = CacheFs.prefix
+    CacheFs.prefix = ""
+    local ok, a, b = pcall(fn, ...)
+    CacheFs.prefix = saved
+    if not ok then return false, a end
+    return a, b
   end
 
   local GREY = { 0, 85 / 255, 170 / 255, 1 }
@@ -106,24 +125,27 @@ return function(mod)
     end
     local perm = job.perm
     local out = love.image.newImageData(w, h)
+    -- how the import uses transparency: a sprite sheet (OAM tiles) has every
+    -- white pixel see-through; a matted picture has only its outside clear
+    local anyClear, opaqueWhite = false, false
+    local shades, clear = {}, {}
     for y = 0, h - 1 do
       for x = 0, w - 1 do
         local r, _, _, a = base:getPixel(x, y)
         local s = shadeOf(r, a)
+        local i = y * w + x
+        clear[i] = a == 0
+        if a == 0 then anyClear = true elseif s == 3 then opaqueWhite = true end
         if perm then s = perm[s + 1] end
-        local v = GREY[s + 1]
-        -- the picture keeps the import's transparency (battle pictures are
-        -- re-matted below, since Pink's edits move their outline)
-        out:setPixel(x, y, v, v, v, a == 0 and 0 or 1)
+        shades[i] = s
       end
     end
+    local whiteClear = anyClear and not opaqueWhite
+    local drawn = {}
     local p = job.patch
     for i = 1, #p, 2 do
-      local index, s = p[i], p[i + 1]
-      local v = GREY[s + 1]
-      local px, py = index % w, math.floor(index / w)
-      local _, _, _, a = out:getPixel(px, py)
-      out:setPixel(px, py, v, v, v, a)
+      shades[p[i]] = p[i + 1]
+      drawn[p[i]] = true
     end
     -- heavy edits come as a grid: '.' keeps the base pixel, '0'-'3' a shade
     local grid = job.grid
@@ -132,11 +154,30 @@ return function(mod)
       for index = 0, w * h - 1 do
         local c = grid:byte(index + 1) - 48
         if c >= 0 and c <= 3 then
-          local v = GREY[c + 1]
-          local px, py = index % w, math.floor(index / w)
-          local _, _, _, a = out:getPixel(px, py)
-          out:setPixel(px, py, v, v, v, a)
+          shades[index] = c
+          drawn[index] = true
         end
+      end
+    end
+    -- The picture keeps the import's transparency, except where Pink drew:
+    -- ink drawn where the import was clear shows, and on a sprite sheet a
+    -- pixel that ends up white is see-through like the rest of its white.
+    -- (Battle pictures are re-matted below, since Pink's edits move their
+    -- outline.)
+    for y = 0, h - 1 do
+      for x = 0, w - 1 do
+        local i = y * w + x
+        local s = shades[i]
+        local v = GREY[s + 1]
+        local see
+        if whiteClear then
+          see = s == 3
+        elseif drawn[i] and clear[i] then
+          see = s == 3
+        else
+          see = clear[i]
+        end
+        out:setPixel(x, y, v, v, v, see and 0 or 1)
       end
     end
     if job.matte then
@@ -154,24 +195,32 @@ return function(mod)
     end
     local path = outRoot .. job.out
     local dir = path:match("^(.*)/[^/]+$")
-    if dir then love.filesystem.createDirectory(dir) end
     local png = out:encode("png"):getString()
-    local existing = love.filesystem.getInfo(path) and love.filesystem.read(path)
-    if existing ~= png then love.filesystem.write(path, png) end
+    if atRoot(CacheFs.readAt, path) == png then return true end
+    if dir and CacheFs.createDirectory then
+      local okDir, dirErr = atRoot(CacheFs.createDirectory, dir)
+      if not okDir then return false, "can't make " .. dir .. ": " .. tostring(dirErr) end
+    end
+    local okWrite, writeErr = atRoot(CacheFs.write, path, png)
+    if not okWrite then return false, "can't write " .. path .. ": " .. tostring(writeErr) end
     return true
   end
 
-  -- a built sheet is there if this run made it or an earlier one did
+  -- a built sheet is there if this run made it or an earlier one did, as
+  -- the asset resolver sees it
   local function present(rel)
-    return love and love.filesystem and love.filesystem.getInfo
-      and love.filesystem.getInfo(outRoot .. rel) ~= nil
+    return okA and type(Assets) == "table" and type(Assets.exists) == "function"
+      and Assets.exists(outRoot .. rel) or false
   end
 
   local built, failed = 0, 0
   local ready = {}
   for _, job in ipairs(A.jobs) do
     local ok, why = false, nil
-    if canBuild then ok, why = build(job) end
+    if canBuild then
+      local okCall, a, b = pcall(build, job)
+      if okCall then ok, why = a, b else ok, why = false, a end
+    end
     if ok or present(job.out) then
       built = built + 1
       ready[job.out] = true
@@ -181,172 +230,280 @@ return function(mod)
     end
   end
   if canBuild then
-    mod.log:info("built %d pictures (%d kept the game's own)", built, failed)
-  end
-
-  -- The town map: Pink redraws a few cells of the layout (town_map.rle).
-  -- field lists append on patch, so the whole townMap key is replaced with
-  -- the player's own copy plus Pink's cells.
-  if next(A.townMap or {}) then
-    local function deepcopy(v)
-      if type(v) ~= "table" then return v end
-      local out = {}
-      for k, x in pairs(v) do out[k] = deepcopy(x) end
-      return out
-    end
-    local townMap = deepcopy(mod.content.field:get("townMap"))
-    local cells = townMap and townMap.background and townMap.background.map
-    if type(cells) == "table" and #cells == 360 then
-      for index, tile in pairs(A.townMap) do cells[index] = tile end
-      mod.content.field:override("townMap", townMap)
+    if failed > 0 then
+      mod.log:warn("built %d pictures; %d kept the game's own art (see the info lines)", built, failed)
     else
-      mod.log:warn("the town map isn't the 20x18 layout Pink edits; left as it is")
+      mod.log:info("built %d pictures", built)
     end
   end
 
-  -- Title screen: Pink's Clefairy (overrides/title/) sits a tile left of
-  -- where the engine puts Yellow's Pikachu, and there's no setting for that
-  -- spot, so the title's draw is wrapped to move just that picture and its
-  -- blink overlays (engine_internals).
-  local shift = A.titleShift or 0
-  local okTS, TitleState = pcall(require, "src.ui.TitleState")
-  if shift ~= 0 and okTS and type(TitleState) == "table" and type(TitleState.draw) == "function"
-      and not TitleState.__pinkShift then
-    local draw = TitleState.draw
-    TitleState.__pinkShift = true
-    TitleState.draw = function(self, ...)
-      if not (self.yellowLayout and love and love.graphics) then return draw(self, ...) end
-      local g = love.graphics
-      local plain = g.draw
-      local moved = { [self.yellowPikachu or false] = true,
-                      [self.eyesHalf or false] = true, [self.eyesClosed or false] = true }
-      g.draw = function(img, x, y, ...)
-        if moved[img] and type(x) == "number" then return plain(img, x - shift, y, ...) end
-        return plain(img, x, y, ...)
-      end
-      local ok, err = pcall(draw, self, ...)
-      g.draw = plain
-      if not ok then error(err, 0) end
-    end
-  elseif shift ~= 0 then
-    mod.log:warn("can't reach the title screen; Pink's Clefairy shows a tile right of its place")
+  -- each of the steps below stands alone: one that fails is reported and
+  -- skipped, and the rest still run
+  local function guard(name, fn)
+    local ok, err = pcall(fn)
+    if not ok then mod.log:warn("%s skipped: %s", name, tostring(err)) end
   end
 
-  -- The partner's moves of note.  Yellow's Pikachu gets a happy mood when
-  -- it learns Thunderbolt or Thunder, and its "thunderbolt" portrait plays
-  -- Thunderbolt's sound; Pink's Clefairy has Metronome and Psychic for the
-  -- first and Psychic's sound for the second (evos_moves.asm,
-  -- pikachu_pic_animation.asm).  Both live in the engine's follower module
-  -- (engine_internals).
-  local okPF, Follower = pcall(require, "src.world.PikachuFollower")
-  if okPF and type(Follower) == "table" and not Follower.__pinkMoves then
-    Follower.__pinkMoves = true
-    local learned = Follower.onMoveLearned
-    if type(learned) == "function" then
-      local AS = { METRONOME = "THUNDERBOLT", PSYCHIC_M = "THUNDER",
-                   THUNDERBOLT = "NONE", THUNDER = "NONE" }
-      Follower.onMoveLearned = function(save, mon, moveId, ...)
-        return learned(save, mon, AS[moveId] or moveId, ...)
+  guard("town map", function()
+    -- The town map: Pink redraws a few cells of the layout (town_map.rle).
+    -- field lists append on patch, so the whole townMap key is replaced with
+    -- the player's own copy plus Pink's cells.
+    if next(A.townMap or {}) then
+      local function deepcopy(v)
+        if type(v) ~= "table" then return v end
+        local out = {}
+        for k, x in pairs(v) do out[k] = deepcopy(x) end
+        return out
+      end
+      local townMap = deepcopy(mod.content.field:get("townMap"))
+      local cells = townMap and townMap.background and townMap.background.map
+      if type(cells) == "table" and #cells == 360 then
+        for index, tile in pairs(A.townMap) do cells[index] = tile end
+        mod.content.field:override("townMap", townMap)
+      else
+        mod.log:warn("the town map isn't the 20x18 layout Pink edits; left as it is")
       end
     end
-    local tick = Follower.tickBolt
-    if type(tick) == "function" then
-      Follower.tickBolt = function(game, ...)
-        local moves = game and game.data and game.data.moves
-        if not (moves and moves.PSYCHIC_M) then return tick(game, ...) end
-        local bolt = moves.THUNDERBOLT
-        moves.THUNDERBOLT = moves.PSYCHIC_M
-        local ok, err = pcall(tick, game, ...)
-        moves.THUNDERBOLT = bolt
-        if not ok then error(err, 0) end
-      end
-    end
-  end
-
-  -- Oak's speech: while your partner is on screen Pink colours it with its
-  -- own palette (SET_PAL_CLEFAIRY: PINKMON over the whole screen) instead
-  -- of the generic one.  The speech's palette choice is wrapped.
-  local okOS, OakSpeech = pcall(require, "src.ui.OakSpeech")
-  if okOS and type(OakSpeech) == "table" and type(OakSpeech.sgbPalettes) == "function"
-      and not OakSpeech.__pinkPal then
-    OakSpeech.__pinkPal = true
-    local pals = OakSpeech.sgbPalettes
-    OakSpeech.sgbPalettes = function(self, game, ...)
-      if self.demoPic and self.pic == self.demoPic then
-        local okP, PaletteFX = pcall(require, "src.render.PaletteFX")
-        local whole = okP and PaletteFX.wholeNamed and PaletteFX.wholeNamed(game.data, "PINKMON")
-        if whole then return whole end
-      end
-      return pals(self, game, ...)
-    end
-  end
-
-  -- Party icons: Pink gives every Pokemon its own icon instead of Yellow's
-  -- shared shapes.  This uses the Minidex 001-251 (Chamber, Soloo993, Blue
-  -- Emerald, Lake, Neslug and Pikachu25, free to use with credit), as Facets
-  -- does: one two-frame 16x16 icon per Pokemon, by Pokedex number, so the
-  -- Clefairy in the PIKACHU slot gets Clefairy's.  Gen 1's party menu keeps
-  -- the game's icon class after the hook and draws by it (mirrored halves,
-  -- the class's own frames), so while one of these is drawn it gets frames
-  -- 0 and 1, drawn whole (the same wrap as Facets).
-  mod.options:define({
-    { key = "party_icons", type = "choice", label = "PARTY ICONS",
-      choices = { { "MINIDEX", "minidex" }, { "GAME", "game" } }, default = "minidex" },
-  })
-  local iconOurs = false
-  local okPM, PartyMenu = pcall(require, "src.ui.PartyMenu")
-  if okPM and type(PartyMenu) == "table" and type(PartyMenu.frameFor) == "function"
-      and type(PartyMenu.mirrorsIcon) == "function" and not PartyMenu.__pinkIcons then
-    PartyMenu.__pinkIcons = true
-    local frameFor, mirrors = PartyMenu.frameFor, PartyMenu.mirrorsIcon
-    PartyMenu.frameFor = function(name, alt, ih)
-      if iconOurs then return alt and 1 or 0 end
-      return frameFor(name, alt, ih)
-    end
-    PartyMenu.mirrorsIcon = function(name)
-      if iconOurs then return false end
-      return mirrors(name)
-    end
-  end
-  mod.hooks:wrap("pokemon.icon", function(nextFn, path, ctx)
-    iconOurs = false
-    local out = nextFn(path, ctx)
-    -- another mod (Facets' icon sets, say) already chose: leave it
-    if out ~= path or mod.options:get("party_icons") == "game" then return out end
-    local data = type(ctx) == "table" and ctx.data
-    local def = type(data) == "table" and type(data.pokemon) == "table" and ctx.species
-      and data.pokemon[ctx.species]
-    local dex = type(def) == "table" and tonumber(def.dex) or nil
-    if not dex or dex < 1 or dex > 151 then return out end
-    ctx.trueColor = true
-    iconOurs = true
-    return mod.assets:path(("assets/icons/%03d.png"):format(dex))
   end)
 
-  -- Gym leaders get their own sprites (Pink's SPRITE_BROCK and friends).
-  -- A sheet that couldn't be built (no Gen 2 import) leaves Yellow's sprite.
-  local function setLeader(mapId, index, sprite)
-    local map = mod.content.maps:get(mapId)
-    if not (map and map.objects and map.objects[index]) then return end
-    local objects = {}
-    for i, o in ipairs(map.objects) do
-      local copy = {}
-      for k, v in pairs(o) do copy[k] = v end
-      objects[i] = copy
+  guard("title screen", function()
+    -- Title screen: Pink's Clefairy (overrides/title/) sits a tile left of
+    -- where the engine puts Yellow's Pikachu, and there's no setting for that
+    -- spot, so the title's draw is wrapped to move just that picture and its
+    -- blink overlays (engine_internals).
+    local shift = A.titleShift or 0
+    local okTS, TitleState = pcall(require, "src.ui.TitleState")
+    if shift ~= 0 and okTS and type(TitleState) == "table" and type(TitleState.draw) == "function"
+        and not TitleState.__pinkShift then
+      local draw = TitleState.draw
+      TitleState.__pinkShift = true
+      TitleState.draw = function(self, ...)
+        if not (self.yellowLayout and love and love.graphics) then return draw(self, ...) end
+        local g = love.graphics
+        local plain = g.draw
+        local moved = { [self.yellowPikachu or false] = true,
+                        [self.eyesHalf or false] = true, [self.eyesClosed or false] = true }
+        g.draw = function(img, x, y, ...)
+          if moved[img] and type(x) == "number" then return plain(img, x - shift, y, ...) end
+          return plain(img, x, y, ...)
+        end
+        local ok, err = pcall(draw, self, ...)
+        g.draw = plain
+        if not ok then error(err, 0) end
+      end
+    elseif shift ~= 0 then
+      mod.log:warn("can't reach the title screen; Pink's Clefairy shows a tile right of its place")
     end
-    objects[index].sprite = sprite
-    mod.content.maps:patch(mapId, { objects = objects })
-  end
+  end)
 
-  for _, job in ipairs(A.jobs) do
-    if job.sprite and ready[job.out] then
-      mod.content.sprites:override(job.sprite, {
-        id = job.sprite,
-        image = ROOT .. job.out,
-        frames = job.frames,
-        walker = job.walker,
-      })
-      setLeader(job.gym, job.object, job.sprite)
+  guard("title colours", function()
+    -- Pink recolours the title (data/sgb/sgb_packets.asm): PalPacket_Titlescreen
+    -- is LOGO1, LOGO2, PIKACHU_PORTRAIT, PIKACHUS_BEACH_TITLE and
+    -- BlkPacket_Titlescreen puts the logo band on LOGO2, Clefairy on LOGO1,
+    -- the cheek rows on PIKACHU_PORTRAIT, the mouth on PIKACHUS_BEACH_TITLE
+    -- and the bubble on LOGO2.  The engine draws Yellow's three regions
+    -- (logo, picture, bubble tail) first; those are swapped for Pink's five
+    -- and anything after them (the menu boxes) is kept.
+    local okTS, TitleState = pcall(require, "src.ui.TitleState")
+    local okP, P = pcall(require, "src.render.PaletteFX")
+    if not (okTS and type(TitleState) == "table" and type(TitleState.sgbPalettes) == "function"
+        and okP and type(P) == "table" and type(P.zone) == "function" and type(P.pal) == "function") then
+      mod.log:warn("can't reach the title's colours; Yellow's are used")
+      return
     end
-  end
+    if TitleState.__pinkColours then return end
+    TitleState.__pinkColours = true
+    local colours = TitleState.sgbPalettes
+    TitleState.sgbPalettes = function(self, game, ...)
+      local z = colours(self, game, ...)
+      if not (self.yellowLayout and type(z) == "table" and z[3] and game and game.data) then return z end
+      local function pal(name) return P.pal(game.data, name) end
+      local pink = {
+        P.zone(pal("LOGO2"), 0, 0, 19, 6),
+        P.zone(pal("LOGO1"), 0, 7, 19, 17),
+        P.zone(pal("PIKACHU_PORTRAIT"), 0, 9, 19, 10),
+        P.zone(pal("PIKACHUS_BEACH_TITLE"), 9, 14, 10, 15),
+        P.zone(pal("LOGO2"), 7, 7, 12, 8),
+      }
+      for _, zone in ipairs(pink) do if not zone then return z end end
+      local out = {}
+      for _, zone in ipairs(pink) do out[#out + 1] = zone end
+      for i = 4, #z do out[#out + 1] = z[i] end
+      return out
+    end
+  end)
+
+  guard("partner moves", function()
+    -- The partner's moves of note.  Yellow's Pikachu gets a happy mood when
+    -- it learns Thunderbolt or Thunder, and its "thunderbolt" portrait plays
+    -- Thunderbolt's sound; Pink's Clefairy has Metronome and Psychic for the
+    -- first and Psychic's sound for the second (evos_moves.asm,
+    -- pikachu_pic_animation.asm).  Both live in the engine's follower module
+    -- (engine_internals).
+    local okPF, Follower = pcall(require, "src.world.PikachuFollower")
+    if okPF and type(Follower) == "table" and not Follower.__pinkMoves then
+      Follower.__pinkMoves = true
+      local learned = Follower.onMoveLearned
+      if type(learned) == "function" then
+        local AS = { METRONOME = "THUNDERBOLT", PSYCHIC_M = "THUNDER",
+                     THUNDERBOLT = "NONE", THUNDER = "NONE" }
+        Follower.onMoveLearned = function(save, mon, moveId, ...)
+          return learned(save, mon, AS[moveId] or moveId, ...)
+        end
+      end
+      local tick = Follower.tickBolt
+      if type(tick) == "function" then
+        Follower.tickBolt = function(game, ...)
+          local moves = game and game.data and game.data.moves
+          if not (moves and moves.PSYCHIC_M) then return tick(game, ...) end
+          local bolt = moves.THUNDERBOLT
+          moves.THUNDERBOLT = moves.PSYCHIC_M
+          local ok, err = pcall(tick, game, ...)
+          moves.THUNDERBOLT = bolt
+          if not ok then error(err, 0) end
+        end
+      end
+    end
+  end)
+
+  guard("direct image loads", function()
+    -- A few screens open the imported picture by path instead of asking
+    -- the asset resolver (the partner's portraits, the surfing minigame and
+    -- its high scores, the slots, the town map), so a mod's derived copy is
+    -- never seen there.  Only the pictures this mod built are redirected,
+    -- and through Assets.resolve, so a higher-priority mod's override of
+    -- the same picture still wins and a session without this mod (another
+    -- game, the mod turned off) gets the path back unchanged.
+    local g = love and love.graphics
+    if not (g and type(g.newImage) == "function" and okA and type(Assets.resolve) == "function") then return end
+    if g.__pinkDerived then
+      g.__pinkDerived.ready = ready -- a reload refreshes the set
+      return
+    end
+    local state = { ready = ready }
+    local newImage = g.newImage
+    g.__pinkDerived = state
+    g.newImage = function(path, ...)
+      if type(path) == "string" then
+        -- some screens put the game's cache folder (yellow/) in front
+        local rel = path:match("^yellow/" .. ROOT:gsub("%p", "%%%0") .. "(.+)$")
+          or (path:sub(1, #ROOT) == ROOT and path:sub(#ROOT + 1)) or nil
+        if rel and state.ready[rel] then
+          local okR, resolved = pcall(Assets.resolve, ROOT .. rel)
+          if okR and type(resolved) == "string" and resolved ~= ROOT .. rel then
+            return newImage(resolved, ...)
+          end
+        end
+      end
+      return newImage(path, ...)
+    end
+  end)
+
+  guard("intro", function()
+    -- The intro: Pink's sprites, timings and spawn spots over the engine's
+    -- Yellow intro (intro.lua).
+    do
+      -- Pink's layouts only make sense over Pink's sheets
+      if not (ready["intro/yellow_intro_1.png"] and ready["intro/yellow_intro_2.png"]) then
+        mod.log:warn("Pink's intro sheets weren't built; Yellow's intro plays")
+        return
+      end
+      local okA, Assets = pcall(require, "src.render.Assets")
+      local okI, why = own("intro.lua").install(own("intro_data.lua"), okA and Assets or nil, ROOT)
+      if not okI then mod.log:warn("Pink's intro isn't installed (%s); Yellow's plays", tostring(why)) end
+    end
+  end)
+
+  guard("Oak's speech palette", function()
+    -- Oak's speech: while your partner is on screen Pink colours it with its
+    -- own palette (SET_PAL_CLEFAIRY: PINKMON over the whole screen) instead
+    -- of the generic one.  The speech's palette choice is wrapped.
+    local okOS, OakSpeech = pcall(require, "src.ui.OakSpeech")
+    if okOS and type(OakSpeech) == "table" and type(OakSpeech.sgbPalettes) == "function"
+        and not OakSpeech.__pinkPal then
+      OakSpeech.__pinkPal = true
+      local pals = OakSpeech.sgbPalettes
+      OakSpeech.sgbPalettes = function(self, game, ...)
+        if self.demoPic and self.pic == self.demoPic then
+          local okP, PaletteFX = pcall(require, "src.render.PaletteFX")
+          local whole = okP and PaletteFX.wholeNamed and PaletteFX.wholeNamed(game.data, "PINKMON")
+          if whole then return whole end
+        end
+        return pals(self, game, ...)
+      end
+    end
+  end)
+
+  guard("party icons", function()
+    -- Party icons: Pink gives every Pokemon its own icon instead of Yellow's
+    -- shared shapes.  This uses the Minidex 001-251 (Chamber, Soloo993, Blue
+    -- Emerald, Lake, Neslug and Pikachu25, free to use with credit), as Facets
+    -- does: one two-frame 16x16 icon per Pokemon, by Pokedex number, so the
+    -- Clefairy in the PIKACHU slot gets Clefairy's.  Gen 1's party menu keeps
+    -- the game's icon class after the hook and draws by it (mirrored halves,
+    -- the class's own frames), so while one of these is drawn it gets frames
+    -- 0 and 1, drawn whole (the same wrap as Facets).
+    mod.options:define({
+      { key = "party_icons", type = "choice", label = "PARTY ICONS",
+        choices = { { "MINIDEX", "minidex" }, { "GAME", "game" } }, default = "minidex" },
+    })
+    local iconOurs = false
+    local okPM, PartyMenu = pcall(require, "src.ui.PartyMenu")
+    if okPM and type(PartyMenu) == "table" and type(PartyMenu.frameFor) == "function"
+        and type(PartyMenu.mirrorsIcon) == "function" and not PartyMenu.__pinkIcons then
+      PartyMenu.__pinkIcons = true
+      local frameFor, mirrors = PartyMenu.frameFor, PartyMenu.mirrorsIcon
+      PartyMenu.frameFor = function(name, alt, ih)
+        if iconOurs then return alt and 1 or 0 end
+        return frameFor(name, alt, ih)
+      end
+      PartyMenu.mirrorsIcon = function(name)
+        if iconOurs then return false end
+        return mirrors(name)
+      end
+    end
+    mod.hooks:wrap("pokemon.icon", function(nextFn, path, ctx)
+      iconOurs = false
+      local out = nextFn(path, ctx)
+      -- another mod (Facets' icon sets, say) already chose: leave it
+      if out ~= path or mod.options:get("party_icons") == "game" then return out end
+      local data = type(ctx) == "table" and ctx.data
+      local def = type(data) == "table" and type(data.pokemon) == "table" and ctx.species
+        and data.pokemon[ctx.species]
+      local dex = type(def) == "table" and tonumber(def.dex) or nil
+      if not dex or dex < 1 or dex > 151 then return out end
+      ctx.trueColor = true
+      iconOurs = true
+      return mod.assets:path(("assets/icons/%03d.png"):format(dex))
+    end)
+  end)
+
+  guard("gym leader sprites", function()
+    -- Gym leaders get their own sprites (Pink's SPRITE_BROCK and friends).
+    -- A sheet that couldn't be built (no Gen 2 import) leaves Yellow's sprite.
+    local function setLeader(mapId, index, sprite)
+      local map = mod.content.maps:get(mapId)
+      if not (map and map.objects and map.objects[index]) then return end
+      local objects = {}
+      for i, o in ipairs(map.objects) do
+        local copy = {}
+        for k, v in pairs(o) do copy[k] = v end
+        objects[i] = copy
+      end
+      objects[index].sprite = sprite
+      mod.content.maps:patch(mapId, { objects = objects })
+    end
+
+    for _, job in ipairs(A.jobs) do
+      if job.sprite and ready[job.out] then
+        mod.content.sprites:override(job.sprite, {
+          id = job.sprite,
+          image = ROOT .. job.out,
+          frames = job.frames,
+          walker = job.walker,
+        })
+        setLeader(job.gym, job.object, job.sprite)
+      end
+    end
+  end)
 end

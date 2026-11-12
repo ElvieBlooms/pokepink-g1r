@@ -27,7 +27,11 @@ Pokémon Pink's look for Gen1Recomp (Yellow). Part of the Pokémon Pink cart.
   (option PARTY ICONS: MINIDEX or GAME). If another mod such as Facets picks
   an icon, its choice wins.
 
-Not yet: Pink's intro and its Super Game Boy border.
+- **Intro**: Pink's Clefairy intro. The game's own intro keeps its scenes,
+  music and timing; the mod draws and animates Pink's sprites in it, with
+  Pink's frames, layouts and spawn spots, and Pink's intro sheets.
+
+Not yet: Pink's Super Game Boy border.
 
 ## How it's built
 

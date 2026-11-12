@@ -30,7 +30,7 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 | `pink_world_tweaks` | map edits, new Cut trees, Mansion ledges, rooftop Fly, Linking Cable in the Celadon mart, Vermilion Dock item | done, needs playtest |
 | `pink_tilesets` | Pink's tile art: Red/Blue tiles built from the player's own Red/Blue import, Pink's own tiles shipped with credit | done, needs playtest |
 | `pink_palettes` | Pink's recoloured palettes, the new cave and grey palettes, split Geodude/Cubone/Jynx palettes | done, needs playtest |
-| `pink_presentation` | Sprites, battle pictures, partner portraits, title screen, badges, slots, town map, surfing minigame, built from your imports | verified headlessly, needs playtest |
+| `pink_presentation` | Sprites, battle pictures, partner portraits, title screen, intro, badges, slots, town map, surfing minigame, party icons, built from your imports | verified headlessly, needs playtest |
 | `pink_voice` | Clefairy voice clips | needs playtest |
 | `pink_manga_events` | Busybody challengers, Trashed House rematches, the beach house Imposter and Pikachu, Mew in Cerulean Cave | verified headlessly, needs playtest |
 | `pink_presentation` | title screen, intro, SGB borders, slots, emotion portraits | planned, waiting on art permissions |
@@ -53,6 +53,7 @@ tools/gen_tile_data.py   regenerates pink_tilesets/tile_data.lua and assets/pink
 tools/gen_palette_data.py regenerates pink_palettes/palette_data.lua
 tools/gen_challenger_data.py regenerates pink_manga_events/challenger_data.lua
 tools/gen_art_data.py    regenerates pink_presentation/art_data.lua and overrides/ (Pink's pixel edits, measured against your imports)
+tools/gen_intro_data.py  regenerates pink_presentation/intro_data.lua (Pink's intro animation; --dump checks against vanilla)
 tools/pikapic.py, title.py, surfing.py  compose the portraits, title and Surfing minigame the way the importer does (each has a vanilla selftest)
 tools/pret_text.py       converts pret text to the engine's strings (vanilla selftest: 0 differences)
 docs/ROADMAP.md     plan, decisions and known issues
