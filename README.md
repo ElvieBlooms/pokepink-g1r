@@ -25,7 +25,7 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 | `pink_partner` | Clefairy is your partner instead of Pikachu (species-slot swap, follower, cry) | prototype |
 | `pink_encounters_trainers` | Pink's wild Pokémon, Super Rod tables and trainer teams | done, needs playtest |
 | `pink_species` | Clefairy's and Clefable's learnsets, Surf/Swift, the Linking Cable | done, needs playtest |
-| `pink_world_tweaks` | map edits, new Cut trees, Mansion ledges, rooftop Fly, Linking Cable in the Celadon mart, Vermilion Dock item | data done; scripts (S.S. Anne, Oak heal, Silph warp, prizes, trades) to come |
+| `pink_world_tweaks` | map edits, new Cut trees, Mansion ledges, rooftop Fly, Linking Cable in the Celadon mart, Vermilion Dock item | done, needs playtest |
 | `pink_tilesets` | Pink's tile art: Red/Blue tiles built from the player's own Red/Blue import, Pink's own tiles shipped with credit | done, needs playtest |
 | `pink_palettes` | Pink's Red-referencing palettes, incl. the split Geodude/Jynx palette lines | planned |
 | `pink_manga_events` | Trainers Blue and Yellow, Busybody rematches, Imposter, surfing beach, VC Mew in place of Mewtwo | planned |

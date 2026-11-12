@@ -19,5 +19,8 @@
     "yellow"
   ],
   "experimental": true,
-  "description": "Pokemon Pink: map edits, new Cut trees, Mansion ledges, rooftop Fly, the Linking Cable at the Celadon Dept. Store and more."
+  "description": "Pokemon Pink: map edits, new Cut trees, Mansion ledges, rooftop Fly, the Linking Cable at the Celadon Dept. Store and more.",
+  "permissions": [
+    "engine_internals"
+  ]
 }

@@ -45,7 +45,7 @@ local function enc(v)
   else return "null" end
 end
 local m = {}
-for id, r in pairs(data.maps) do m[id] = { label = r.label, blocks = r.blocks, outdoor = r.outdoor } end
+for id, r in pairs(data.maps) do m[id] = { label = r.label, blocks = r.blocks, outdoor = r.outdoor, warps = r.warps, signs = r.signs } end
 local t = {}
 for id, r in pairs(data.tilesets) do t[id] = { blocks = r.blocks, walkable = r.walkable } end
 local f = data.field
@@ -53,7 +53,19 @@ io.stderr:write("@@JSON@@" .. enc({ maps = m, tilesets = t, cut = f.cutTreeSwaps
   dungeon = f.dungeonTransitionMaps, hidden = { gate = f.hiddenItems.SAFARI_ZONE_GATE or false,
   dock = f.hiddenItems.VERMILION_DOCK or false },
   mart = data.text_pointers.CeladonMart4F.TEXT_CELADONMART4F_CLERK.mart,
-  cable = data.items.ITEM_32.name }) .. "\n")
+  cable = data.items.ITEM_32.name, trades = f.trades,
+  text = { chap = data.text._PinkVermilionReturningChapText ~= nil, sign = data.text._PinkVermilionDockSignText ~= nil },
+  scripts = { vermilion = data.map_scripts.VERMILION_CITY and #data.map_scripts.VERMILION_CITY or 0,
+              dock = data.map_scripts.VERMILION_DOCK and #data.map_scripts.VERMILION_DOCK or 0,
+              hof = data.map_scripts.HALL_OF_FAME and #data.map_scripts.HALL_OF_FAME or 0,
+              prizes = data.map_scripts.GAME_CORNER_PRIZE_ROOM and #data.map_scripts.GAME_CORNER_PRIZE_ROOM or 0 },
+  prizeNames = (function()
+    local out = {}
+    for _, id in ipairs({ "ABRA", "GROWLITHE", "SLOWPOKE", "CLEFABLE", "DRAGONAIR", "PORYGON" }) do
+      out[#out + 1] = data.pokemon[id] and data.pokemon[id].name or "?"
+    end
+    return out
+  end)() }) .. "\n")
 '''
 open("/tmp/vworld.lua", "w").write(driver)
 p = subprocess.run(["luajit", "/tmp/vworld.lua"], cwd=repo, capture_output=True, text=True)
@@ -120,6 +132,27 @@ print("Celadon 4F shelf:", got["mart"], "| ITEM_32 is", got["cable"])
 if got["hidden"]["gate"] or got["hidden"]["dock"] != [{"item": "FULL_RESTORE", "x": 21, "y": 0}]:
     bad += 1
 if "ITEM_32" not in got["mart"] or not all(got["maps"][r].get("outdoor") for r in ("CELADON_MART_ROOF", "CELADON_MANSION_ROOF")):
+    bad += 1
+# warps and trades must equal Pink's (swapped) lists
+labels = {r["label"]: mid for mid, r in got["maps"].items() if r.get("label")}
+pw, vw = gw.parse_warps(pink), gw.parse_warps(vanilla)
+for label, wl in pw.items():
+    mid = labels.get(label)
+    if mid and wl != vw.get(label):
+        have = [{k: w[k] for k in ("x", "y", "destMap", "destWarp")} for w in got["maps"][mid]["warps"]]
+        if have != wl:
+            bad += 1; print("WARPS MISMATCH", mid)
+want_trades = [dict(t, give=gw.SWAP.get(t["give"], t["give"]), get=gw.SWAP.get(t["get"], t["get"])) for t in gw.parse_trades(pink)]
+have_trades = [{k: t[k] for k in ("give", "get", "dialogset", "nickname")} for t in got["trades"]]
+if have_trades != want_trades:
+    bad += 1; print("TRADES MISMATCH")
+print("trades:", ", ".join("%s->%s" % (t["give"], t["get"]) for t in have_trades))
+print("dock signs:", got["maps"]["VERMILION_DOCK"].get("signs"))
+print("prize names:", got.get("prizeNames"))
+if got.get("prizeNames", [None])[3] != "RAICHU":
+    bad += 1; print("PRIZE SLOT MISMATCH")
+print("text registered:", bool(got["text"]["chap"]), bool(got["text"]["sign"]), "| map_scripts chain entries:", got["scripts"])
+if not (got["text"]["chap"] and got["text"]["sign"]) or 0 in got["scripts"].values():
     bad += 1
 print("checked %d maps Pink edits against its .blk files: %d mismatches" % (checked_maps, bad))
 sys.exit(1 if bad else 0)

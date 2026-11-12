@@ -4,7 +4,7 @@
 1. ~~pink_partner~~ (prototype, tested in-game)
 2. ~~pink_encounters_trainers~~ (built, verified headlessly, needs playtest)
 3. ~~pink_species~~ (built, verified headlessly, needs playtest)
-4. pink_world_tweaks: data layer done (verified headlessly); scripts next
+4. ~~pink_world_tweaks~~ (verified headlessly; needs playtest)
 4b. ~~pink_tilesets~~ (built; composition verified pixel-for-pixel against Pink; needs playtest)
 5. pink_palettes
 6. pink_manga_events
@@ -46,9 +46,19 @@ no hook for it, so both Celadon roofs are marked `outdoor`. Side effects
 accepted for now: Teleport works there, and the roof can become the
 "last outdoor spot" an Escape Rope or Dig returns to.
 
-**Game Corner prizes** are hardcoded in the engine's `data/scripts/story3.lua`
-(no registry), so Pink's prize lists need a hook into the prize counter and
-the `engine_internals` permission.
+**Game Corner prizes** are local tables in the engine's `data/scripts/story3.lua`,
+picked by a private function, so no mod can reach them. The mod replaces the three
+counters' talk handlers with its own prize vendor (`prize_vendor.lua`), written
+from the original game's behaviour (pret `engine/events/prize_menu.asm`) rather
+than copied from the engine, whose code is GPLv3 and couldn't go into this MIT
+repo. It uses the engine's TextBox, PrizeCounter, Bag and script runner
+(`engine_internals`). If upstream ever moves the prize lists into data, switch
+to that and drop the vendor.
+
+**S.S. Anne return.** Pink checks EVENT_BEAT_GREEN; the engine's equivalent is
+`EVENT_BEAT_CHAMPION_RIVAL`. Entering Vermilion after the Champion clears
+`EVENT_SS_ANNE_LEFT`; an `onStep` on (18,30) shows Pink's sailor line and lets
+you board. Text keeps Pink's spelling ("come on abord!").
 
 **Tile art.** Of the 93 tiles Pink changes, 30 exist in international Red/Blue
 and get built at runtime from the player's own Red or Blue import (the Facets

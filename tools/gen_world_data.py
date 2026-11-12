@@ -43,10 +43,10 @@ local function enc(v)
 end
 local maps, ts, f = dofile(dir .. "/maps.lua"), dofile(dir .. "/tilesets.lua"), dofile(dir .. "/field.lua")
 local m, t = {}, {}
-for id, r in pairs(maps) do m[id] = { label = r.label, blocks = r.blocks } end
+for id, r in pairs(maps) do m[id] = { label = r.label, blocks = r.blocks, warps = r.warps } end
 for id, r in pairs(ts) do t[id] = { blocks = r.blocks, walkable = r.walkable } end
 io.write(enc({ maps = m, tilesets = t, cutTreeSwaps = f.cutTreeSwaps,
-               dungeon = f.dungeonTransitionMaps }))
+               dungeon = f.dungeonTransitionMaps, trades = f.trades }))
 '''.replace("DIR", repr(gen_dir))
     p = subprocess.run(["luajit", "-e", script], capture_output=True, text=True)
     if p.returncode:
@@ -116,6 +116,37 @@ def parse_dungeon(root):
         if m and m.group(1) not in ("-1",):
             singles.append(m.group(1))
     return singles, ranges
+
+
+SWAP = {"PIKACHU": "CLEFAIRY", "CLEFAIRY": "PIKACHU", "RAICHU": "CLEFABLE", "CLEFABLE": "RAICHU"}
+DIALOGSET = {"TRADE_DIALOGSET_CASUAL": 1, "TRADE_DIALOGSET_EVOLUTION": 2, "TRADE_DIALOGSET_HAPPY": 3}
+
+
+def parse_warps(root):
+    """map label -> [ {x, y, destMap, destWarp} ] from data/maps/objects/*.asm"""
+    out = {}
+    d = os.path.join(root, "data/maps/objects")
+    for fn in sorted(os.listdir(d)):
+        if not fn.endswith(".asm"):
+            continue
+        warps = []
+        for raw in open(os.path.join(d, fn)):
+            m = re.match(r"warp_event\s+(\d+),\s*(\d+),\s*(\w+),\s*(\d+)", strip(raw))
+            if m:
+                warps.append({"x": int(m.group(1)), "y": int(m.group(2)),
+                              "destMap": m.group(3), "destWarp": int(m.group(4))})
+        out[fn[:-4]] = warps
+    return out
+
+
+def parse_trades(root):
+    out = []
+    for raw in open(os.path.join(root, "data/events/trades.asm")):
+        m = re.match(r'npctrade\s+(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*"([^"]*)"', strip(raw))
+        if m:
+            out.append({"give": m.group(1), "get": m.group(2),
+                        "dialogset": DIALOGSET[m.group(3)], "nickname": m.group(4)})
+    return out
 
 
 def main():
@@ -188,7 +219,36 @@ def main():
     dungeon = {"maps": [m for m in singles if m not in have_maps],
                "ranges": [{"first": a, "last": b} for a, b in ranges if (a, b) not in have_ranges]}
 
+    # ---- warps: whole warp list for any map whose list differs
+    # Only maps whose warps Pink changed compared with vanilla pret (pret
+    # keeps debug warps the engine's import drops, e.g. Red's house 2F).
+    warps = {}
+    vanilla_root = root if selftest else root.replace("pokepink", "pokeyellow")
+    vanilla_warps = parse_warps(vanilla_root)
+    for label, wl in parse_warps(root).items():
+        mid = by_label.get(label)
+        if not mid:
+            continue
+        have = [{k: w[k] for k in ("x", "y", "destMap", "destWarp")} for w in (imp["maps"][mid].get("warps") or [])]
+        if selftest:
+            if wl != have and label != "RedsHouse2F":
+                warps[mid] = wl
+            continue
+        if wl != vanilla_warps.get(label):
+            if vanilla_warps.get(label) != have:
+                notes.append(f"{mid}: vanilla pret warps differ from the import; check by hand")
+            warps[mid] = wl
+
+    # ---- in-game trades: the whole list (Pink rewrites every trade)
+    trades = parse_trades(root)
+    if not selftest:
+        trades = [dict(t, give=SWAP.get(t["give"], t["give"]), get=SWAP.get(t["get"], t["get"])) for t in trades]
+    have_trades = [{k: t[k] for k in ("give", "get", "dialogset", "nickname")} for t in imp["trades"]]
+    trades_out = trades if trades != have_trades else None
+
     if selftest:
+        print("selftest: %d warp lists, trades %s" % (len(warps), "differ" if trades_out else "match"))
+        for k in list(warps)[:5]: print("  warps", k, warps[k], imp["maps"][k].get("warps"))
         print("selftest: %d maps, %d tilesets' blocks, %d walkable lists, %d cut pairs, "
               "%d dungeon maps, %d dungeon ranges differ"
               % (len(blocks), len(block_defs), len(walkable), len(cut),
@@ -202,7 +262,9 @@ def main():
         f.write("-- Only cells, blocks and lists that differ from vanilla Yellow are listed.\n")
         f.write("return " + json_to_lua({"blocks": blocks, "blockDefs": block_defs,
                                          "walkable": walkable, "cutTrees": cut,
-                                         "dungeon": dungeon}) + "\n")
+                                         "dungeon": dungeon, "warps": warps,
+                                         "trades": trades_out or []}) + "\n")
+    print("warps:", {k: len(v) for k, v in warps.items()}, "| trades:", len(trades_out or []))
     print("wrote %s: %d maps (%d cells), blocks in %s, walkable %s, %d cut pairs, "
           "%d dungeon maps + %d ranges"
           % (out_path, len(blocks), sum(len(v) for v in blocks.values()),

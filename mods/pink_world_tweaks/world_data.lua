@@ -307,8 +307,138 @@ return {
       },
     },
   },
+  trades = {
+    {
+      dialogset = 1,
+      get = "DODRIO",
+      give = "DITTO",
+      nickname = "STOOGES",
+    },
+    {
+      dialogset = 1,
+      get = "STARMIE",
+      give = "CLEFAIRY",
+      nickname = "ASTRAL",
+    },
+    {
+      dialogset = 3,
+      get = "BUTTERFREE",
+      give = "BEEDRILL",
+      nickname = "MARGE",
+    },
+    {
+      dialogset = 1,
+      get = "WEEZING",
+      give = "TAUROS",
+      nickname = "SMOKEY",
+    },
+    {
+      dialogset = 3,
+      get = "MEW",
+      give = "MEW",
+      nickname = "LISA",
+    },
+    {
+      dialogset = 1,
+      get = "CHANSEY",
+      give = "RHYHORN",
+      nickname = "CHERYL",
+    },
+    {
+      dialogset = 2,
+      get = "PIDGEOT",
+      give = "PIDGEOT",
+      nickname = "MCFLY",
+    },
+    {
+      dialogset = 3,
+      get = "KANGASKHAN",
+      give = "KINGLER",
+      nickname = "GENGHIS",
+    },
+    {
+      dialogset = 3,
+      get = "SEEL",
+      give = "VULPIX",
+      nickname = "CADET",
+    },
+    {
+      dialogset = 2,
+      get = "KADABRA",
+      give = "VOLTORB",
+      nickname = "HOUDINI",
+    },
+  },
   walkable = {
     FACILITY = { 1, 16, 17, 19, 27, 32, 33, 34, 48, 49, 50, 66, 67, 82, 85, 88, 94 },
     FOREST = { 30, 32, 46, 48, 52, 55, 57, 58, 64, 81, 82, 94, 95 },
+  },
+  warps = {
+    ROUTE_6 = {
+      {
+        destMap = "ROUTE_6_GATE",
+        destWarp = 3,
+        x = 11,
+        y = 1,
+      },
+      {
+        destMap = "ROUTE_6_GATE",
+        destWarp = 3,
+        x = 10,
+        y = 1,
+      },
+      {
+        destMap = "ROUTE_6_GATE",
+        destWarp = 1,
+        x = 10,
+        y = 7,
+      },
+      {
+        destMap = "UNDERGROUND_PATH_ROUTE_6",
+        destWarp = 1,
+        x = 17,
+        y = 13,
+      },
+    },
+    SILPH_CO_11F = {
+      {
+        destMap = "SILPH_CO_10F",
+        destWarp = 2,
+        x = 9,
+        y = 0,
+      },
+      {
+        destMap = "SILPH_CO_ELEVATOR",
+        destWarp = 1,
+        x = 13,
+        y = 0,
+      },
+      {
+        destMap = "SILPH_CO_1F",
+        destWarp = 5,
+        x = 12,
+        y = 16,
+      },
+      {
+        destMap = "SILPH_CO_7F",
+        destWarp = 4,
+        x = 3,
+        y = 2,
+      },
+    },
+    SUMMER_BEACH_HOUSE = {
+      {
+        destMap = "LAST_MAP",
+        destWarp = 1,
+        x = 3,
+        y = 7,
+      },
+      {
+        destMap = "LAST_MAP",
+        destWarp = 1,
+        x = 2,
+        y = 7,
+      },
+    },
   },
 }

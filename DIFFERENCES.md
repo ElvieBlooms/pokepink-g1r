@@ -28,6 +28,17 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - Celadon Dept. Store 4F sells the Linking Cable.
 - Safari Zone Gate's unreachable hidden Nugget removed; a hidden Full Restore at
   Vermilion Dock (21, 0).
+- Silph Co. 11F: the spot by the elevator warps to the 1F lobby. The Route 6
+  gate and Summer Beach House exits move with their map edits.
+- All ten in-game trades are Pink's (Ditto for Dodrio, Pikachu for Starmie, and so on).
+- After you beat the Champion, the S.S. Anne is back at Vermilion Dock and the
+  sailor lets you board without a ticket. Leaving the ship plays the departure
+  again, as in Pink.
+- Oak heals your party after the Hall of Fame.
+- Game Corner prizes as in Pink: Abra (L12, 200 coins), Growlithe (L16, 1100),
+  Slowpoke (L20, 1600); Raichu (L26, 3200), Dragonair (L28, 5000), Porygon
+  (L24, 9100); TMs unchanged. Needs `engine_internals`.
+- A harbor sign on Vermilion Dock (11, 1), with Pink's text.
 - Dungeon battle intro also on Pokémon Mansion 1F, Victory Road 2F/3F, Power
   Plant, Diglett's Cave, Silph Co. 9F-11F, Seafoam B1F-B4F, Rocket Hideout B1F-B4F.
 
