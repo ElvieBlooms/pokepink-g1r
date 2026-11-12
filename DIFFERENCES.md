@@ -174,3 +174,12 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - Rival 2 and 3: Pink's single team per fight fills every vanilla Eevee branch.
 - Trainer movesets that Pink hand-picked are built from Pink's learnsets
   (loads after pink_species).
+
+## pink_look_picker (cart extra, not in Pink)
+- At NEW GAME, just before "First, what is your name?", Oak asks whether you'd
+  like to pick your look (over your current look). YES opens PRISM, the menu
+  Facets, Emerald Lens and Crystal Lens share (or the one mod's own screen);
+  backing out of it lets Oak carry on, showing your new look.
+- Oak asks nothing when none of those mods is loaded, or when ASK AT NEW GAME
+  is off. Needs `engine_internals` (it asks for the START menu's PRISM item
+  through the mods runtime).

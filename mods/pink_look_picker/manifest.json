@@ -1,0 +1,26 @@
+{
+  "id": "pink_look_picker",
+  "name": "Pink Look Picker",
+  "version": "0.2.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "UI",
+  "priority": 120,
+  "dependencies": [],
+  "optional_dependencies": [
+    "facets",
+    "emerald_lens"
+  ],
+  "conflicts": [],
+  "incompatible": [],
+  "games": [
+    "yellow"
+  ],
+  "permissions": [
+    "engine_internals"
+  ],
+  "experimental": true,
+  "description": "For the Pokemon Pink cart: at NEW GAME, Oak offers to open PRISM (Facets, Emerald Lens) so you can pick your look before he asks your name. Not part of Pink itself."
+}

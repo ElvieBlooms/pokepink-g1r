@@ -33,9 +33,9 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 | `pink_presentation` | Sprites, battle pictures, partner portraits, title screen, intro, badges, slots, town map, surfing minigame, party icons, built from your imports | verified headlessly, needs playtest |
 | `pink_voice` | Clefairy voice clips | needs playtest |
 | `pink_manga_events` | Busybody challengers, Trashed House rematches, the beach house Imposter and Pikachu, Mew in Cerulean Cave | verified headlessly, needs playtest |
-| `pink_presentation` | title screen, intro, SGB borders, slots, emotion portraits | planned, waiting on art permissions |
+| `pink_look_picker` | Cart extra, not in Pink: at NEW GAME Oak offers PRISM (Facets, Emerald Lens) to pick your look | verified headlessly, needs playtest |
 
-Every mod depends on `pink_partner`: the others refer to Clefairy and Pikachu
+The Pink mods that touch species depend on `pink_partner`: they refer to Clefairy and Pikachu
 by their swapped internal IDs (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 Load order is `pink_partner`, `pink_species`, `pink_palettes`, `pink_world_tweaks`, then `pink_encounters_trainers`.
 
