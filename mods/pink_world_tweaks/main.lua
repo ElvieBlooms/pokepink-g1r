@@ -220,6 +220,19 @@ return function(mod)
     mod.log:warn("can't find the captain's script; his Champion line is skipped")
   end
 
+  -- Pink's fix for the Route 16 sign on the Route 17 boundary: in the cart
+  -- you can't read a sign on the map you're facing into, so Pink repeats it
+  -- just past Route 17's top edge (5, -1), readable from (5, 0) facing up.
+  local r17 = mod.content.maps:get("ROUTE_17")
+  if r17 then
+    local signs = deepcopy(r17.signs or {})
+    signs[#signs + 1] = { x = 5, y = -1, text = "TEXT_PINK_ROUTE17_ROUTE16_SIGN" }
+    mod.content.maps:patch("ROUTE_17", { signs = signs })
+    mod.content.map_scripts:register("ROUTE_17", {
+      talk = { TEXT_PINK_ROUTE17_ROUTE16_SIGN = { { "show_text", "_Route16SignText" } } },
+    })
+  end
+
   -- Oak heals your party after the Hall of Fame.  This runs before the
   -- engine's own Hall of Fame handler, which clears pendingHallOfFame.
   mod.content.map_scripts:register("HALL_OF_FAME", {

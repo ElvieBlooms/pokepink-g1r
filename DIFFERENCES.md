@@ -51,9 +51,13 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   Karate Master. The Bulbasaur and the male Nidoran cry as themselves.
 - Officer Jenny gives Charmander and Damian (Route 24) gives Squirtle.
 - After the Champion, the S.S. Anne captain has a new line.
-- Not ported: Pink's fixes to vanilla bugs (Mt. Moon B2F escape warp, the
-  Pewter youngster's sprite, Pokémon Tower 2F's table end) and its extra
-  Route 17 sign off the map's top edge.
+- Pink's repeat of the Route 16 sign just past Route 17's top edge (5, -1),
+  so it can be read from Route 17.
+- Pink's other three bug fixes aren't needed: the engine already behaves
+  correctly there (Mt. Moon B2F's no-battle zone is checked each step, so an
+  Escape Rope can't carry it out of the cave; the Pewter youngster is placed by
+  map cell, not screen pixel; Pokémon Tower 2F's rival trigger is just its two
+  cells).
 - Dungeon battle intro also on Pokémon Mansion 1F, Victory Road 2F/3F, Power
   Plant, Diglett's Cave, Silph Co. 9F-11F, Seafoam B1F-B4F, Rocket Hideout B1F-B4F.
 
