@@ -42,6 +42,15 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - Dungeon battle intro also on Pokémon Mansion 1F, Victory Road 2F/3F, Power
   Plant, Diglett's Cave, Silph Co. 9F-11F, Seafoam B1F-B4F, Rocket Hideout B1F-B4F.
 
+## pink_palettes
+- Pink's colours for 42 Super Game Boy palettes and 27 Game Boy Color palettes.
+- New palettes: CAVE_YELLOW (Cerulean Cave 1F, 2F, B1F) and GRAYMON_YELLOW
+  (Trade Center, Colosseum).
+- Raticate, Geodude, Graveler, Golem, Cubone and Marowak use GRAYMON_YELLOW;
+  Jynx uses 0F.
+- The Game Boy Color palettes are written into the loaded data on `game.ready`
+  (no registry covers them); needs `engine_internals`.
+
 ## pink_tilesets
 - Nine tileset sheets rebuilt at startup (Overworld, Forest, Facility, Gate,
   Gym, Lab, Mansion, Plateau, Ship Port), 93 tiles in all.

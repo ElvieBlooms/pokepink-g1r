@@ -6,7 +6,7 @@
 3. ~~pink_species~~ (built, verified headlessly, needs playtest)
 4. ~~pink_world_tweaks~~ (verified headlessly; needs playtest)
 4b. ~~pink_tilesets~~ (built; composition verified pixel-for-pixel against Pink; needs playtest)
-5. pink_palettes
+5. ~~pink_palettes~~ (verified headlessly; needs playtest)
 6. pink_manga_events
 7. pink_presentation (art permissions first)
 8. Cart release
@@ -68,6 +68,13 @@ ship as a patch image credited to jcferggy, gated on his permission.
 The mod gets the cache location from the engine (`AssetTransform.SOURCE_ROOT`,
 as Facets does) rather than hard-coding it, which is also what keeps lint
 rule MK301 clean.
+
+**Palettes.** The `palettes` registry covers the Super Game Boy set, species
+use their `palette` field, and maps use their own `palette` field, which the
+engine checks before its lookup. The Game Boy Color set (`cgbBase`) has no
+registry; the engine reads it fresh on each lookup, so the mod writes Pink's
+colours into the loaded data on `game.ready`. Pink's new SET_PAL_CLEFAIRY
+command and its title/intro colours belong to pink_presentation.
 
 **Super Rod** lives in the `field` registry, where lists append, so the mod
 rebuilds the whole `superRod` key from the merged view.

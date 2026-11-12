@@ -27,13 +27,13 @@ same release, then **MODS > Import mod .zip** each one on Yellow and enable them
 | `pink_species` | Clefairy's and Clefable's learnsets, Surf/Swift, the Linking Cable | done, needs playtest |
 | `pink_world_tweaks` | map edits, new Cut trees, Mansion ledges, rooftop Fly, Linking Cable in the Celadon mart, Vermilion Dock item | done, needs playtest |
 | `pink_tilesets` | Pink's tile art: Red/Blue tiles built from the player's own Red/Blue import, Pink's own tiles shipped with credit | done, needs playtest |
-| `pink_palettes` | Pink's Red-referencing palettes, incl. the split Geodude/Jynx palette lines | planned |
+| `pink_palettes` | Pink's recoloured palettes, the new cave and grey palettes, split Geodude/Cubone/Jynx palettes | done, needs playtest |
 | `pink_manga_events` | Trainers Blue and Yellow, Busybody rematches, Imposter, surfing beach, VC Mew in place of Mewtwo | planned |
 | `pink_presentation` | title screen, intro, SGB borders, slots, emotion portraits | planned, waiting on art permissions |
 
 Every mod depends on `pink_partner`: the others refer to Clefairy and Pikachu
 by their swapped internal IDs (see [docs/ROADMAP.md](docs/ROADMAP.md)).
-Load order is `pink_partner`, `pink_species`, `pink_world_tweaks`, then `pink_encounters_trainers`.
+Load order is `pink_partner`, `pink_species`, `pink_palettes`, `pink_world_tweaks`, then `pink_encounters_trainers`.
 
 ## Layout
 
@@ -45,6 +45,7 @@ tools/gen_world_data.py  regenerates pink_world_tweaks/world_data.lua
 tools/verify_pink.py     loads the mods over an imported Yellow and diffs against Pink
 tools/verify_world.py    the same for map, tileset and field changes
 tools/gen_tile_data.py   regenerates pink_tilesets/tile_data.lua and assets/pink_tiles.png
+tools/gen_palette_data.py regenerates pink_palettes/palette_data.lua
 docs/ROADMAP.md     plan, decisions and known issues
 DIFFERENCES.md      what each mod changes from vanilla Yellow
 CREDITS.md          who made what
