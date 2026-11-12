@@ -2,6 +2,7 @@
 
 ## Pokémon Pink Version: Special Clefairy Edition
 - **jcferggy**, original romhack: design, data, scripts and events.
+  Original release: [Pokémon Pink Version: Special Clefairy Edition on PokéCommunity](https://www.pokecommunity.com/threads/pok%C3%A9mon-pink-version-special-clefairy-edition-ue.542531/)
   Permission to port: **granted** (Discord, 2026-11-12), on the condition that
   credit is given. This covers Pink's design, data, scripts, text and jcferggy's
   own art.
