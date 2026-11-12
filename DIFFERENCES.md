@@ -31,6 +31,14 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - Dungeon battle intro also on Pokémon Mansion 1F, Victory Road 2F/3F, Power
   Plant, Diglett's Cave, Silph Co. 9F-11F, Seafoam B1F-B4F, Rocket Hideout B1F-B4F.
 
+## pink_tilesets
+- Nine tileset sheets rebuilt at startup (Overworld, Forest, Facility, Gate,
+  Gym, Lab, Mansion, Plateau, Ship Port), 93 tiles in all.
+- 30 tiles come from the player's own Red (or Blue) import; without either,
+  Yellow's tile stays. 63 are Pink's own and ship in `assets/pink_tiles.png`.
+- Written to `save/mod-derived/pink_tilesets/tilesets/`, which the engine uses
+  in place of the imported sheet while the mod is enabled. Needs `engine_internals`.
+
 ## pink_encounters_trainers
 - Grass and water encounters on 36 maps, and Super Rod tables on 26 maps, as in Pink.
 - Trainer parties for 17 classes (generic trainers restored to Red/Blue, manga

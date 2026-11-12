@@ -5,6 +5,9 @@
   Permission to port: *requested, awaiting reply.*
 
 ## Art in the original hack
+- **jcferggy**: Pink's own tile edits (`mods/pink_tilesets/assets/pink_tiles.png`,
+  59 tiles found in no Red, Blue, Yellow or Japanese Blue cart). Not covered by
+  the MIT license; shipping them is part of the permission request.
 - **Artsy-Theo**: Clefairy emotion portraits. Permission: *not yet asked.*
 - **Sindorman**: the Clefairy animation that inspired the project (credited in
   Pink's README). Whether any of Sindorman's art is in the game: *to confirm.*

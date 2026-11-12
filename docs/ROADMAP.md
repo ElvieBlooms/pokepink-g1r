@@ -5,7 +5,7 @@
 2. ~~pink_encounters_trainers~~ (built, verified headlessly, needs playtest)
 3. ~~pink_species~~ (built, verified headlessly, needs playtest)
 4. pink_world_tweaks: data layer done (verified headlessly); scripts next
-4b. pink_tilesets
+4b. ~~pink_tilesets~~ (built; composition verified pixel-for-pixel against Pink; needs playtest)
 5. pink_palettes
 6. pink_manga_events
 7. pink_presentation (art permissions first)
@@ -55,6 +55,9 @@ and get built at runtime from the player's own Red or Blue import (the Facets
 route, `engine_internals` + `CacheFs`). The other 63 exist in no cart (checked
 against Red, Blue, Yellow and Japanese Blue), so they are Pink's own tiles and
 ship as a patch image credited to jcferggy, gated on his permission.
+The mod gets the cache location from the engine (`AssetTransform.SOURCE_ROOT`,
+as Facets does) rather than hard-coding it, which is also what keeps lint
+rule MK301 clean.
 
 **Super Rod** lives in the `field` registry, where lists append, so the mod
 rebuilds the whole `superRod` key from the merged view.
