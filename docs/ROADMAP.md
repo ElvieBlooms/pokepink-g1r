@@ -7,7 +7,7 @@
 4. ~~pink_world_tweaks~~ (verified headlessly; needs playtest)
 4b. ~~pink_tilesets~~ (built; composition verified pixel-for-pixel against Pink; needs playtest)
 5. ~~pink_palettes~~ (verified headlessly; needs playtest)
-6. pink_manga_events
+6. pink_manga_events: A (Busybody challengers) done, verified headlessly; B (Trashed House rematches) and C (Imposter, beach house, Mew) next
 7. pink_presentation (art permissions first)
 8. Cart release
 

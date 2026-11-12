@@ -51,6 +51,17 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - The Game Boy Color palettes are written into the loaded data on `game.ready`
   (no registry covers them); needs `engine_internals`.
 
+## pink_manga_events
+- Yellow's unused CHIEF class becomes BUSYBODY (Pink's trainer picture and
+  overworld sprite).
+- The Busybody waits on six maps (Underground Paths, Celadon Dept. Store roof,
+  Safari Zone West, Pokémon Mansion 1F, Victory Road 3F): Pink's trigger cells,
+  approach and exit paths, lines and CHIEF parties 1-6. Lose and he comes back;
+  beat him and his EVENT_BEAT_..._CHIEF flag is set.
+- Differences from Pink: the rival's encounter theme stands in for Yellow's
+  unused song (not imported by the engine), and his line for beating you isn't
+  shown (scripted battles only take the losing line).
+
 ## pink_tilesets
 - Nine tileset sheets rebuilt at startup (Overworld, Forest, Facility, Gate,
   Gym, Lab, Mansion, Plateau, Ship Port), 93 tiles in all.

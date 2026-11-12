@@ -1,0 +1,23 @@
+{
+  "id": "pink_manga_events",
+  "name": "Pink Manga Events",
+  "version": "0.2.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "GAMEPLAY",
+  "priority": 111,
+  "dependencies": [
+    "pink_partner@>=0.2.0",
+    "pink_encounters_trainers@>=0.2.0"
+  ],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "incompatible": [],
+  "games": [
+    "yellow"
+  ],
+  "experimental": true,
+  "description": "Pokemon Pink's manga events: the Busybody who challenges you around Kanto."
+}
