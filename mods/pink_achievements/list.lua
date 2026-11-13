@@ -1,0 +1,93 @@
+-- Pokemon Pink's achievement list (76, 564 points), written for this port in
+-- the style of a RetroAchievements set. `uses` borrows one of Recomp
+-- Achievements' own Yellow checks (rules/gen1_official.lua); entries with
+-- no `uses` are checked by main.lua. Ids never change once released.
+local P, W, M = "progression", "win_condition", "missable"
+return {
+  -- Badges and the League
+  { id = "boulder_badge", title = "Rock Bottom", description = "Earn the Boulder Badge from Brock in Pewter City.", points = 5, type = P, category = "BADGES", uses = "off_boulderbadge" },
+  { id = "cascade_badge", title = "Tidal Turn", description = "Earn the Cascade Badge from Misty in Cerulean City.", points = 5, type = P, category = "BADGES", uses = "off_cascadebadge" },
+  { id = "thunder_badge", title = "Grounded", description = "Earn the Thunder Badge from Lt. Surge in Vermilion City.", points = 5, type = P, category = "BADGES", uses = "off_thunderbadge" },
+  { id = "rainbow_badge", title = "Petal Power", description = "Earn the Rainbow Badge from Erika in Celadon City.", points = 10, type = P, category = "BADGES", uses = "off_rainbowbadge" },
+  { id = "soul_badge", title = "Smoke and Mirrors", description = "Earn the Soul Badge from Koga in Fuchsia City.", points = 10, type = P, category = "BADGES", uses = "off_soulbadge" },
+  { id = "marsh_badge", title = "Moonlit Mind", description = "Earn the Marsh Badge from Sabrina in Saffron City.", points = 10, type = P, category = "BADGES", uses = "off_marshbadge" },
+  { id = "volcano_badge", title = "Hot Springs", description = "Earn the Volcano Badge from Blaine on Cinnabar Island.", points = 10, type = P, category = "BADGES", uses = "off_volcanobadge" },
+  { id = "earth_badge", title = "Shake the Earth", description = "Earn the Earth Badge from Giovanni in Viridian City.", points = 10, type = P, category = "BADGES", uses = "off_earthbadge" },
+  { id = "champion", title = "Pretty in Pink", description = "Defeat the Elite Four and the Champion and enter the Hall of Fame.", points = 25, type = W, category = "LEAGUE", uses = "off_champion" },
+  -- Story and rival
+  { id = "pokedex", title = "Starting Line", description = "Receive your Pokédex from Professor Oak.", points = 1, type = P, category = "STORY", uses = "off_pokedex" },
+  { id = "rival_route22_early", title = "Early Bird", description = "Defeat your rival on Route 22 before you reach Pewter City.", points = 5, type = M, category = "STORY", uses = "off_y_route22_early" },
+  { id = "rival_nugget_bridge", title = "Bridge Toll", description = "Defeat your rival by Cerulean City's Nugget Bridge.", points = 10, type = P, category = "STORY", uses = "off_y_nugget_rival" },
+  { id = "rival_ss_anne", title = "All Hands on Deck", description = "Defeat your rival aboard the S.S. Anne.", points = 10, type = P, category = "STORY", uses = "off_y_ss_anne_rival" },
+  { id = "rival_tower", title = "Quiet, Please", description = "Defeat your rival inside Pokémon Tower in Lavender Town.", points = 5, category = "STORY", uses = "off_y_tower_rival" },
+  { id = "rival_silph", title = "Office Politics", description = "Defeat your rival inside Silph Co. in Saffron City.", points = 10, type = P, category = "STORY", uses = "off_y_silph_rival" },
+  { id = "rival_route22_final", title = "Final Checkpoint", description = "Defeat your rival on Route 22 on the way to the Pokémon League.", points = 10, type = P, category = "STORY", uses = "off_y_route22_rival" },
+  -- Team Rocket
+  { id = "jj_mt_moon", title = "Moonstruck", description = "Defeat Jessie and James in Mt. Moon using only Clefairy.", points = 10, type = M, category = "ROCKET", uses = "off_y_event_beat_mt_moon_3_jessie_james" },
+  { id = "jj_hideout", title = "Underground Encore", description = "Defeat Jessie and James in the Rocket Hideout using only Clefairy.", points = 10, type = M, category = "ROCKET", uses = "off_y_event_beat_rocket_hideout_4_jessie_james" },
+  { id = "jj_tower", title = "Ghost Writers", description = "Defeat Jessie and James in Pokémon Tower using only Clefairy.", points = 10, type = M, category = "ROCKET", uses = "off_y_event_beat_pokemontower_7_jessie_james" },
+  { id = "jj_silph", title = "Hostile Takeover", description = "Defeat Jessie and James in Silph Co. using only Clefairy.", points = 10, type = M, category = "ROCKET", uses = "off_y_event_beat_silph_co_11f_jessie_james" },
+  { id = "giovanni_hideout", title = "Game Over, Rocket", description = "Defeat Giovanni in the Rocket Hideout under Celadon City.", points = 10, category = "ROCKET", uses = "off_y_hideout" },
+  { id = "giovanni_silph", title = "Silph Liberated", description = "Defeat Giovanni and drive Team Rocket out of Silph Co.", points = 10, category = "ROCKET", uses = "off_y_silph" },
+  -- Pink's own
+  { id = "busybody_first", title = "Mind Your Business", description = "Defeat the Busybody for the first time.", points = 5, category = "PINK" },
+  { id = "busybody_all", title = "Nosy No More", description = "Defeat the Busybody in all six places he lies in wait.", points = 15, category = "PINK", goal = 6, unit = "PLACES" },
+  { id = "busybody_house", title = "Full House", description = "Defeat all seven Busybodies in Cerulean City's Trashed House.", points = 10, category = "PINK", goal = 7, unit = "BEATEN" },
+  { id = "imposter", title = "Seeing Double", description = "Defeat the Imposter at the Summer Beach House.", points = 25, category = "PINK" },
+  { id = "mew", title = "Something Mew", description = "Catch the Mew waiting deep in Cerulean Cave.", points = 10, type = M, category = "PINK" },
+  { id = "birds", title = "Birds of a Feather", description = "Catch Articuno, Zapdos and Moltres on one save.", points = 25, type = M, category = "PINK", uses = "off_birds" },
+  { id = "ss_anne_return", title = "Welcome Back Aboard", description = "Board the S.S. Anne after it returns to Vermilion City.", points = 3, category = "PINK" },
+  { id = "captain_line", title = "Captain's Log", description = "As Champion, hear what the S.S. Anne's captain has to say.", points = 2, category = "PINK" },
+  { id = "linking_cable", title = "Strong Connection", description = "Evolve a Pokémon with the Linking Cable.", points = 5, category = "PINK" },
+  { id = "linking_cable_all", title = "Fully Networked", description = "Evolve Kadabra, Machoke, Graveler and Haunter with the Linking Cable on one save.", points = 10, category = "PINK", goal = 4, unit = "EVOLVED" },
+  { id = "prize_dragonair", title = "Lucky Dragon", description = "Win Dragonair at the Celadon Game Corner.", points = 5, category = "PINK" },
+  { id = "prize_porygon", title = "Prize Program", description = "Win Porygon at the Celadon Game Corner.", points = 10, category = "PINK" },
+  { id = "surf", title = "Wave Rider", description = "Teach Clefairy Surf.", points = 3, category = "PINK" },
+  { id = "surf_score", title = "Clefairy's Beach", description = "Score at least 5,000 points in the surfing minigame.", points = 10, category = "PINK" },
+  -- Classic
+  { id = "full_party", title = "Full Party", description = "Have six Pokémon in your party.", points = 1, category = "POKEMON", uses = "off_full_team" },
+  { id = "halfway", title = "Halfway There", description = "Raise all six party Pokémon to Level 50 (no legendaries; checked on level up).", points = 10, category = "POKEMON", uses = "off_halfway_yellow" },
+  { id = "fossil", title = "Fossil Hunter", description = "Take a fossil from Mt. Moon.", points = 1, category = "STORY", uses = "off_fossil" },
+  { id = "dojo", title = "Dojo Master", description = "Defeat the Fighting Dojo's master (Pink dresses him as Koga) and claim your prize.", points = 5, category = "STORY", uses = "off_dojo" },
+  { id = "tower_ghost", title = "Who Goes There?", description = "Meet the ghost blocking the stairs in Pokémon Tower.", points = 1, category = "STORY", uses = "off_y_tower_ghost" },
+  { id = "snorlax", title = "Rude Awakening", description = "Wake a Pokémon with the Poké Flute and catch it.", points = 5, type = M, category = "POKEMON", uses = "off_snorlax" },
+  { id = "magikarp", title = "Buyer's Remorse", description = "Buy the Magikarp at the Pokémon Center by Mt. Moon.", points = 3, category = "STORY", uses = "off_y_magikarp" },
+  -- the gifts keep Yellow's flags; Pink swaps which Pokemon each one gives
+  { id = "gift_bulbasaur", title = "Green Thumb", description = "Receive Bulbasaur from Melanie in Cerulean City.", points = 5, category = "POKEMON", uses = "off_y_bulbasaur" },
+  { id = "gift_charmander", title = "On Duty", description = "Receive Charmander from Officer Jenny in Vermilion City.", points = 5, category = "POKEMON", uses = "off_y_squirtle" },
+  { id = "gift_squirtle", title = "Stray No More", description = "Receive Squirtle from Damian on Route 24.", points = 5, category = "POKEMON", uses = "off_y_charmander" },
+  -- Trades: each Pink trade sets the flag of the Yellow trader it replaces
+  { id = "trade_dodrio", title = "Copy That", description = "Trade a Ditto for Dodrio on Route 11.", points = 3, category = "TRADES", uses = "off_event_traded_nidorino_for_nidorina" },
+  { id = "trade_starmie", title = "Star Power", description = "Trade a Pikachu for Starmie on Route 2.", points = 3, category = "TRADES", uses = "off_event_traded_abra_for_mr_mime" },
+  { id = "trade_weezing", title = "Clearing the Air", description = "Trade a Tauros for Weezing at the Cinnabar Lab.", points = 3, category = "TRADES", uses = "off_event_traded_ponyta_for_seel" },
+  { id = "trade_chansey", title = "Lucky Break", description = "Trade a Rhyhorn for Chansey on Route 18.", points = 3, category = "TRADES", uses = "off_event_traded_slowbro_for_lickitung" },
+  { id = "trade_kangaskhan", title = "Pocket Change", description = "Trade a Kingler for Kangaskhan at the Cinnabar Lab.", points = 3, category = "TRADES", uses = "off_event_traded_raichu_for_electrode" },
+  { id = "trade_seel", title = "Seal the Deal", description = "Trade a Vulpix for Seel at the Cinnabar Lab.", points = 3, category = "TRADES", uses = "off_event_traded_venonat_for_tangela" },
+  { id = "trade_kadabra", title = "Now You See Me", description = "Trade a Voltorb for Kadabra in the Underground Path.", points = 3, category = "TRADES", uses = "off_event_traded_nidoran_m_for_nidoran_f" },
+  -- Challenges
+  { id = "dex", title = "Gotta Catch 'em All - Pink", description = "Catch all 136 Pokémon you can get on one save.", points = 50, type = M, category = "POKEDEX", goal = 136, unit = "OWNED" },
+  { id = "no_flash", title = "Lights Out", description = "Cross Rock Tunnel from Route 9 to Lavender Town without using Flash.", points = 10, category = "CHALLENGE", uses = "off_y_no_flash" },
+  { id = "safari", title = "Safari Sprint", description = "Reach the man with HM03 in the Safari Zone with 209 or more steps left (one visit, no Surf).", points = 10, category = "CHALLENGE", uses = "off_safari_209" },
+  { id = "gauntlet", title = "The Long Way Round", description = "Defeat every trainer on Routes 12 to 15 without leaving them (one session).", points = 25, type = M, category = "CHALLENGE", uses = "off_y_gauntlet" },
+  { id = "solo", title = "Solo Act", description = "Defeat the Elite Four and the Champion with only Clefairy in your party (one session).", points = 50, category = "CHALLENGE", uses = "off_league_pikachu" },
+  -- Clefairy: friendship (the emotion grid in pikachu_pic_animation.asm)
+  { id = "mood_grumpy", title = "Grumpy Fairy", description = "Check on Clefairy when its friendship is low (0-50) and it's in a bad mood.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81795" },
+  { id = "mood_warming", title = "Warming Up", description = "Check on Clefairy when its friendship is 51-100.", points = 1, category = "CLEFAIRY", uses = { "off_y_pika_81798", "off_y_pika_81799", "off_y_pika_81800" } },
+  { id = "mood_good", title = "Good Company", description = "Check on Clefairy at 101-160 friendship in a good mood.", points = 1, category = "CLEFAIRY", uses = { "off_y_pika_81803", "off_y_pika_81805" } },
+  { id = "mood_inseparable", title = "Inseparable", description = "Check on Clefairy at 161-200 friendship in a good mood.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81808" },
+  { id = "mood_moon", title = "To the Moon and Back", description = "Check on Clefairy at 201-250 friendship when it isn't in a bad mood.", points = 1, category = "CLEFAIRY", uses = { "off_y_pika_81809", "off_y_pika_81810" } },
+  { id = "mood_best", title = "Best Fairy Forever", description = "Check on Clefairy at 251-255 friendship in a good mood.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81812" },
+  -- Clefairy: reactions
+  { id = "react_caught", title = "Caught Up", description = "Catch a Pokémon, then talk to Clefairy.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81813" },
+  { id = "react_fishing", title = "Gone Fishing", description = "Use a fishing rod, then talk to Clefairy.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81814" },
+  { id = "react_evolve", title = "Not Today, Moon Stone", description = "Try to evolve Clefairy, then talk to it.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81815" },
+  { id = "react_signature", title = "Wag a Finger", description = "Teach Clefairy Metronome or Psychic, then talk to it.", points = 1, type = M, category = "CLEFAIRY", uses = "off_y_pika_81816" },
+  { id = "react_asleep", title = "Sleepyhead", description = "Talk to Clefairy while it's asleep (no Pokémon Center first).", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81817" },
+  { id = "react_status", title = "Under the Weather", description = "Talk to Clefairy while it has any status besides sleep.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81818" },
+  { id = "react_lullaby", title = "Lullaby", description = "Talk to Clefairy after Jigglypuff's song puts you to sleep.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81819" },
+  { id = "react_ghost", title = "Ghost Story", description = "Talk to Clefairy in Pokémon Tower.", points = 1, category = "CLEFAIRY", uses = "off_y_pika_81820" },
+  { id = "react_bill", title = "Who Are You?", description = "Have Clefairy puzzle over Bill as a Pokémon, then be amazed when he changes back.", points = 1, type = M, category = "CLEFAIRY", uses = "off_y_bill_scene" },
+  { id = "react_fan_club", title = "Puppy Love", description = "Have Clefairy fall for the Pikachu at the Pokémon Fan Club.", points = 1, type = M, category = "CLEFAIRY", uses = "off_y_pika_81977" },
+  { id = "react_release", title = "Not Going Anywhere", description = "Try to release Clefairy.", points = 1, category = "CLEFAIRY", uses = "off_y_release" },
+  { id = "react_ledge", title = "Ledge Dancer", description = "Have Clefairy wait behind a ledge for a while.", points = 1, category = "CLEFAIRY", uses = "off_y_ledge_dance" },
+}

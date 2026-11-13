@@ -183,3 +183,19 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
 - Oak asks nothing when none of those mods is loaded, or when ASK AT NEW GAME
   is off. Needs `engine_internals` (it asks for the START menu's PRISM item
   through the mods runtime).
+
+## pink_achievements (cart extra, not in Pink)
+- Pink's own achievement list (76 achievements, 564 points), written for this
+  port in the style of a RetroAchievements set: Yellow's set adapted to
+  Clefairy, plus Pink's own events (the Busybody, the Imposter, Mew, the S.S.
+  Anne's return, the Linking Cable, the Game Corner's Dragonair and Porygon,
+  Surf and the surfing minigame).
+- With Recomp Achievements 2.8.0 or newer it is the Pokemon Pink cart's own
+  list (cart lists): on the cart it takes the RA Yellow list's place and the
+  leaderboard card goes on the `pokepink` board. Off the cart it isn't shown.
+- 66 of its checks borrow Recomp Achievements' own Yellow checks (`uses` in
+  `list.lua`); the rest are in `main.lua`. Each Pink trade sets the flag of
+  the Yellow trader whose place it takes, and the gifts keep Yellow's flags.
+- "Gotta Catch 'em All - Pink" is 136: every species one save can get (no
+  Mewtwo, Venonat, Venomoth, Drowzee, Hypno, Sandshrew, Sandslash, Grimer,
+  Muk or Tangela in Pink, one fossil, one Dojo prize, one Eevee evolution).

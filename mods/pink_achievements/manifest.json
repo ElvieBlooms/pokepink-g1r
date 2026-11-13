@@ -1,0 +1,23 @@
+{
+  "id": "pink_achievements",
+  "name": "Pink Achievements",
+  "version": "0.2.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "GAMEPLAY",
+  "priority": 125,
+  "dependencies": [],
+  "optional_dependencies": [
+    "recomp_achievements@>=2.8.0"
+  ],
+  "conflicts": [],
+  "incompatible": [],
+  "games": [
+    "yellow"
+  ],
+  "permissions": [],
+  "experimental": false,
+  "description": "Pokemon Pink's own achievement list for Recomp Achievements: on the Pokemon Pink cart it takes the RA Yellow list's place and goes on its own leaderboard."
+}
