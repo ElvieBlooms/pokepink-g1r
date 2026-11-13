@@ -326,6 +326,18 @@ return function(mod)
         P.zone(pal("LOGO2"), 7, 7, 12, 8),
       }
       for _, zone in ipairs(pink) do if not zone then return z end end
+      -- The whole title rides at -SCY while it drops in (TitleState draws it
+      -- at y - scy), but zones sit on the screen.  Move Pink's with it, or
+      -- Clefairy's head passes through the logo's zone and its light pink
+      -- shows as the logo's yellow.  The logo zone reaches up to the top and
+      -- Clefairy's down to the bottom, so the bounce leaves no gap.
+      local dy = -(tonumber(self.scy) or 0)
+      if dy ~= 0 then
+        for _, zone in ipairs(pink) do zone.y = zone.y + dy end
+        local top, body = pink[1], pink[2]
+        if top.y > 0 then top.h, top.y = top.h + top.y, 0 end
+        if body.y + body.h < 144 then body.h = 144 - body.y end
+      end
       local out = {}
       for _, zone in ipairs(pink) do out[#out + 1] = zone end
       for i = 4, #z do out[#out + 1] = z[i] end
