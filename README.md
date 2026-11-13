@@ -9,6 +9,10 @@ rebuilt as a set of mods on top of your own Pokémon Yellow.
 > To play Pink as originally made, get jcferggy's original release on
 > [PokéCommunity](https://www.pokecommunity.com/threads/pok%C3%A9mon-pink-version-special-clefairy-edition-ue.542531/).
 
+**Beta testers:** [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) walks through
+what should happen, story-wise, so you can compare and report anything that
+doesn't match.
+
 No ROM, patch, disassembly or ROM-derived art is included. You import your own
 Pokémon Yellow in Gen1Recomp, and these mods rebuild Pink's changes on top of it.
 
