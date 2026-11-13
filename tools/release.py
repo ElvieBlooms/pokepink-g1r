@@ -9,15 +9,20 @@ For each mods/<id>/:
   - runs the engine's modkit `validate --strict` and `lint` (pack runs them
     again at strict level and refuses on any finding: no ROM content gets out),
   - packs dist/<id>-<VERSION>.zip with the mod files at the archive root.
-Then writes dist/sha256sums.txt, which cartkit reads to pin each mod.
+Then writes dist/sha256sums.txt, which cartkit reads to pin each mod, and packs
+each skins/<id>/ as dist/<id>.zip. Skins keep an unversioned name because the
+launcher takes a skin's id from its file name, so a new release replaces the
+old skin instead of adding a second one. They stay out of sha256sums.txt, since
+a cart can't pin a skin.
 
 The engine checkout comes from --engine, else $G1R_ROOT, else
 ~/dev/gen1recomp-dev. modkit needs python3 and luajit.
 """
-import argparse, hashlib, json, os, re, subprocess, sys
+import argparse, hashlib, json, os, re, subprocess, sys, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODS = os.path.join(ROOT, "mods")
+SKINS = os.path.join(ROOT, "skins")
 
 def main():
     ap = argparse.ArgumentParser()
@@ -73,7 +78,21 @@ def main():
 
     with open(os.path.join(a.out, "sha256sums.txt"), "w") as fh:
         fh.write("\n".join(sums) + "\n")
+    skins = sorted(d for d in os.listdir(SKINS) if os.path.isfile(os.path.join(SKINS, d, "skin.lua"))) \
+        if os.path.isdir(SKINS) else []
+    for sid in skins:
+        src = os.path.join(SKINS, sid)
+        zpath = os.path.join(a.out, sid + ".zip")
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
+            for base, _, files in os.walk(src):
+                for name in sorted(files):
+                    full = os.path.join(base, name)
+                    z.write(full, os.path.relpath(full, src))
+        print("==> skin %s" % sid, flush=True)
+
     print("\nreleased %d mods at %s into %s" % (len(ids), a.version, a.out))
+    if skins:
+        print("  skins: " + ", ".join(s + ".zip" for s in skins))
     for line in sums:
         print("  " + line)
 

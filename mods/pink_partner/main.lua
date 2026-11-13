@@ -77,9 +77,11 @@ return function(mod)
   -- this project; not covered by the repo's MIT license).  Six 16x16 frames
   -- in the engine's walker order: stand down, stand up, stand left, walk
   -- down, walk up, walk left (right is drawn mirrored).  trueColor keeps the
-  -- artist's colours in full-colour mode.  In the Game Boy palette modes the
-  -- engine shades sprites by the red channel (>83% is transparent), so each
-  -- colour's red value was lowered just enough to land on the right shade.
+  -- sheet's own colours in full-colour mode: pink, recoloured from the
+  -- artist's tan by changing only green and blue.  In the Game Boy palette
+  -- modes the engine shades sprites by the red channel (>83% is transparent),
+  -- so each colour's red value was lowered just enough to land on the right
+  -- shade, and the recolour leaves red alone.
   -- Pink swaps the two overworld sheets: SPRITE_CLEFAIRY (the Fan Club pet,
   -- and the Pikachu Pink puts in Celadon and the beach house) shows Pikachu.
   -- That art is the game's own, so point at the player's imported Pikachu

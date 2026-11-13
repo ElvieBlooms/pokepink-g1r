@@ -43,7 +43,12 @@ credited. Their art is credited here and will be removed on request.
   the MIT license.
 
 ## Art made for this port
-- **Anima_nel**: Clefairy overworld walking sprite (`mods/pink_partner/assets/clefairy_follower.png`).
+- **ElvieBlooms**: the Super Game Boy border's frame, POKéMON and PINK
+  lettering, Poké Balls, sparkles and bubble tails
+  (`skins/pink_sgb_border/img/border.png`), drawn new in place of the pieces
+  Pink's border shares with Yellow's. The border's Clefairys and FAIRY bubbles
+  are jcferggy's.
+- **Anima_nel**: Clefairy overworld walking sprite (`mods/pink_partner/assets/clefairy_follower.png`), recoloured pink by ElvieBlooms.
   Purchased for use in this project, with credit. Not covered by the MIT license.
 
 ## Foundations

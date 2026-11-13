@@ -26,7 +26,7 @@ Red, Blue, Yellow, Gold, Silver and Crystal imports.
 | Badges, slot reels, town map tiles, bolt emote | Yellow's, edited | built from Yellow's plus Pink's pixels |
 | Intro sheets | Yellow's, edited | built from Yellow's plus Pink's pixels |
 | Intro animation | Pink's frame scripts, layouts, spawn spots (asm) | the intro's sprite steps are wrapped (pink_presentation/intro.lua) |
-| SGB border | Skin Studio canvas in the engine | not ported |
+| SGB border | Pink's Clefairys and FAIRY bubbles; the rest is Yellow's | a launcher skin next to the cart; Yellow's pieces redrawn as new art (tools/gen_sgb_border.py) |
 | Party icons | Pink's per-species grey icons, source unknown | the Minidex 001-251 stands in (shipped with credit, as in Facets) |
 
 "Built at runtime" is the route the engine asks for when art is derived from a

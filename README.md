@@ -20,6 +20,10 @@ every mod at one release and plays as its own game with its own saves.
 To install the mods by hand instead, get every `pink_*-X.Y.Z.zip` from the
 same release, then **MODS > Import mod .zip** each one on Yellow and enable them all.
 
+Pink's Super Game Boy border comes as a skin, `pink_sgb_border.zip`, next to
+the cart. Install it from the launcher's **SKINS** tab; a cart can't carry a
+skin itself. See [skins/pink_sgb_border](skins/pink_sgb_border/README.md).
+
 ## The mods
 
 | Mod | What it does | Status |
@@ -44,6 +48,7 @@ Load order is `pink_partner`, `pink_species`, `pink_palettes`, `pink_world_tweak
 
 ```
 mods/<id>/          one folder per mod, exactly what goes in its .zip
+skins/pink_sgb_border/   Pink's SGB border as a launcher skin, exactly what goes in its .zip
 tools/release.py    builds every mod as one lockstep release (runs modkit gates)
 tools/gen_pink_data.py   regenerates pink_encounters_trainers/data.lua and pink_species/species_data.lua
 tools/gen_world_data.py  regenerates pink_world_tweaks/world_data.lua
@@ -56,6 +61,7 @@ tools/gen_challenger_data.py regenerates pink_manga_events/challenger_data.lua
 tools/gen_art_data.py    regenerates pink_presentation/art_data.lua and overrides/ (Pink's pixel edits, measured against your imports)
 tools/gen_intro_data.py  regenerates pink_presentation/intro_data.lua (Pink's intro animation; --dump checks against vanilla)
 tools/pikapic.py, title.py, surfing.py  compose the portraits, title and Surfing minigame the way the importer does (each has a vanilla selftest)
+tools/gen_sgb_border.py  regenerates skins/pink_sgb_border/img/border.png (Yellow's pieces redrawn as new art)
 tools/pret_text.py       converts pret text to the engine's strings (vanilla selftest: 0 differences)
 docs/ROADMAP.md     plan, decisions and known issues
 DIFFERENCES.md      what each mod changes from vanilla Yellow

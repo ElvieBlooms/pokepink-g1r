@@ -7,7 +7,7 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   holds Clefable (#36), `CLEFAIRY` holds Pikachu (#25), `CLEFABLE` holds Raichu (#26).
   Names, Pokédex numbers, stats, types, sprites, cries, palettes, learnsets and
   Pokédex entries move with them; evolutions are rewired (Moon Stone for the partner).
-- The partner follower is an animated Clefairy (Anima_nel's sprite, kept in its own colours).
+- The partner follower is an animated Clefairy: Anima_nel's sprite, recoloured pink in full-colour mode (only green and blue changed, so the Game Boy shades are the same).
 - Yellow's recorded Pikachu voice clips are off; the partner uses Clefairy's normal cry.
 - Tester option (off by default): one Moon Stone per save.
 - As in Pink, the two overworld sheets swap: SPRITE_CLEFAIRY (the Fan Club pet,
@@ -151,8 +151,8 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   third runs' spots, and the close-up a tile left with its new object). Data
   from Pink's asm (`intro_data.lua`, tools/gen_intro_data.py); with Yellow's
   data the same code replays the engine's intro frame for frame.
-- Not ported yet: the Super Game Boy border (a Skin Studio canvas, not
-  something mods set).
+- The Super Game Boy border isn't part of this mod: it ships as a skin,
+  `skins/pink_sgb_border`, installed from the launcher's SKINS tab.
 
 ## pink_voice
 - Pink's 42 Clefairy voice clips play wherever Yellow plays its recorded

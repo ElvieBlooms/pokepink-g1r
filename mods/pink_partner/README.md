@@ -21,9 +21,10 @@ Pikachu voice clips are switched off so the partner uses Clefairy's normal cry.
 ## Credits
 
 - Clefairy overworld walking sprite (`assets/clefairy_follower.png`) by
-  **Anima_nel**, purchased for use in this project. It is not covered by the
-  MIT license and may not be reused outside this mod without the artist's
-  permission.
+  **Anima_nel**, purchased for use in this project, recoloured pink by
+  ElvieBlooms (green and blue only, so the Game Boy shades are unchanged).
+  It is not covered by the MIT license and may not be reused outside this mod
+  without the artist's permission.
 
 Known gaps (later mods): emotion portraits, surfing minigame art, title
 screen, text that names PIKACHU directly, Pink's Clefairy voice clips.

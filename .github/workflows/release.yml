@@ -64,5 +64,5 @@ jobs:
             gh release upload "$TAG" dist/* --clobber
           else
             gh release create "$TAG" dist/* --title "Pokémon Pink for Gen1Recomp $TAG" \
-              --notes "Every Pokémon Pink mod at ${TAG#v}. Install them together on Yellow, or play the Pokémon Pink cart, which pins this release."
+              --notes "Every Pokémon Pink mod at ${TAG#v}. Install them together on Yellow, or play the Pokémon Pink cart, which pins this release. pink_sgb_border.zip is Pink's Super Game Boy border as a skin: install it from the launcher's SKINS tab."
           fi
