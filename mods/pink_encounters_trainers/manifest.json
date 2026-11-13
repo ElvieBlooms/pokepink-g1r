@@ -1,7 +1,7 @@
 {
   "id": "pink_encounters_trainers",
   "name": "Pink Encounters & Trainers",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "api": 2,
   "entry": "main.lua",
   "profile": "content",
