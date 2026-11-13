@@ -151,6 +151,13 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   third runs' spots, and the close-up a tile left with its new object). Data
   from Pink's asm (`intro_data.lua`, tools/gen_intro_data.py); with Yellow's
   data the same code replays the engine's intro frame for frame.
+- The intro's colours: the falling, standing, close-up and jumping scenes
+  use LOGO1 (Clefairy pink) where Yellow uses MEWMON, since Pink's
+  YellowIntroPaletteAction sends PalPacket_Titlescreen there. In the colour
+  modes that play as a Game Boy Color (RED++, OG YELLOW), the Clefairy tiles
+  Pink moves to object palette 1 while surfing and flying are drawn again in
+  LOGO1, so they keep their pink over the beach palette's blue. The engine
+  skips those object palette pokes for Yellow's Pikachu.
 - The Super Game Boy border isn't part of this mod: it ships as a skin,
   `skins/pink_sgb_border`, installed from the launcher's SKINS tab.
 

@@ -26,6 +26,7 @@ Red, Blue, Yellow, Gold, Silver and Crystal imports.
 | Badges, slot reels, town map tiles, bolt emote | Yellow's, edited | built from Yellow's plus Pink's pixels |
 | Intro sheets | Yellow's, edited | built from Yellow's plus Pink's pixels |
 | Intro animation | Pink's frame scripts, layouts, spawn spots (asm) | the intro's sprite steps are wrapped (pink_presentation/intro.lua) |
+| Intro colours | LOGO1 where Yellow has MEWMON; Clefairy's surf and fly tiles on object palette 1 (LOGO1) | the palette swapped in YellowIntro.sgbPalettes; the poked tiles redrawn in LOGO1 over the colour pass in Game Boy Color modes |
 | SGB border | Pink's Clefairys and FAIRY bubbles; the rest is Yellow's | a launcher skin next to the cart; Yellow's pieces redrawn as new art (tools/gen_sgb_border.py) |
 | Party icons | Pink's per-species grey icons, source unknown | the Minidex 001-251 stands in (shipped with credit, as in Facets) |
 

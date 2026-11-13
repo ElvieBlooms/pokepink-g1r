@@ -82,6 +82,7 @@ function M.install(I, Assets, ROOT)
           if okImg and img then
             self[field] = img
             self.bgDirty = true
+            if field == "atlas2" then self.pinkSheet2 = path end
           end
         end
       end
@@ -127,15 +128,75 @@ function M.install(I, Assets, ROOT)
     end
   end
 
+  -- On a Game Boy Color, Pink gives some of Clefairy's sprite tiles object
+  -- palette 1 while it surfs (scene 7, Func_f98a2) and flies (scene 11,
+  -- Func_f98cb), and YellowIntroPaletteAction loads LOGO1 into that slot, so
+  -- those tiles stay Clefairy pink instead of taking the beach palette's
+  -- blue.  The numbers are the OAM slots it sets, counted from 0 in the
+  -- order the objects write them.
+  local POKED = {
+    [7] = { [4] = true, [6] = true, [7] = true, [10] = true, [14] = true, [16] = true },
+    [11] = { [1] = true, [2] = true, [3] = true, [4] = true, [6] = true, [7] = true,
+             [8] = true, [9] = true, [10] = true, [11] = true, [12] = true, [13] = true,
+             [16] = true, [17] = true, [19] = true, [21] = true, [25] = true, [26] = true,
+             [27] = true, [28] = true },
+  }
+  local okP, P = pcall(require, "src.render.PaletteFX")
+  local okSR, SR = pcall(require, "src.render.SpriteRenderer")
+  M.POKED = POKED
+
+  -- The LOGO1 sheet for this frame, or nil when those tiles keep the
+  -- screen's colours: only the colour modes that play the game as a Game
+  -- Boy Color do the pokes, and only when this mod built the sheet.
+  local function logoSheet(self)
+    local poked = POKED[self.scene]
+    if not (poked and self.pinkSheet2 and okP and okSR and type(P) == "table"
+        and type(SR) == "table" and type(SR.obpImage) == "function"
+        and type(P.markUiSpriteRedraw) == "function") then
+      return nil
+    end
+    local cgb = (type(P.usesGbcPack) == "function" and P.usesGbcPack())
+      or (type(P.usesYellowCgb) == "function" and P.usesYellowCgb())
+    if not cgb then return nil end
+    local data = self.game and self.game.data
+    local pal = data and P.pal(data, "LOGO1")
+    if not pal then return nil end
+    local map, bgp = {}, tonumber(self.bgp) or 0xE4
+    for i = 0, 3 do map[i] = math.floor(bgp / 4 ^ i) % 4 end
+    local okI, img = pcall(SR.obpImage, self.pinkSheet2, P.permute(pal, map), "pinklogo1_" .. bgp)
+    if not (okI and img) then return nil end
+    return img, poked
+  end
+
+  -- Where Yellow sends PalPacket_Generic (MEWMON), Pink's
+  -- YellowIntroPaletteAction sends PalPacket_Titlescreen, whose first
+  -- palette is LOGO1: the falling, standing, close-up and jumping scenes are
+  -- Clefairy pink rather than MEWMON's orange and purple.  The beach scenes
+  -- keep PIKACHUS_BEACH, as Pink does.
+  if type(YI.sgbPalettes) == "function" then
+    local sgbPalettes = YI.sgbPalettes
+    YI.sgbPalettes = function(self, game, ...)
+      if self.pre or self.palName ~= "MEWMON" then return sgbPalettes(self, game, ...) end
+      self.palName = "LOGO1"
+      local ok, zones = pcall(sgbPalettes, self, game, ...)
+      self.palName = "MEWMON"
+      if ok and zones then return zones end
+      return sgbPalettes(self, game, ...)
+    end
+  end
+
   YI.drawObjects = function(self)
     local atlas = self.atlas2
     if not atlas then return end
+    local sheet, poked = logoSheet(self)
+    local slot = -1
     for _, obj in ipairs(self.objects) do
       local fs = obj.fs and frameset(obj.fs)
       local frameId = fs and fs.frames[obj.step] and fs.frames[obj.step][1]
       local frame = frameId and I.frames[frameId + 1]
       if frame then
         for _, e in ipairs(frame.oam) do
+          slot = slot + 1 -- every entry takes an OAM slot, on screen or not
           -- OAM: screen = (x + dx - 8, y + dy - 16), all 8-bit
           local px = (obj.x + obj.xoff + e[2] - 8) % 256
           local py = (obj.y + obj.yoff + e[1] - 16) % 256
@@ -145,6 +206,14 @@ function M.install(I, Assets, ROOT)
               love.graphics.draw(atlas, quad, px + 8, py, 0, -1, 1)
             else
               love.graphics.draw(atlas, quad, px, py)
+            end
+            if sheet and poked[slot] then
+              -- drawn again over the colour pass, in LOGO1
+              if e[4] then
+                P.markUiSpriteRedraw(sheet, quad, px + 8, py, { sx = -1 })
+              else
+                P.markUiSpriteRedraw(sheet, quad, px, py)
+              end
             end
           end
         end
