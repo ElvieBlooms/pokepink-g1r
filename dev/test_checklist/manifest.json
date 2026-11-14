@@ -1,0 +1,13 @@
+{
+  "id": "test_checklist",
+  "name": "Test Checklist",
+  "version": "0.1.1",
+  "api": 2,
+  "entry": "main.lua",
+  "category": "Tools",
+  "profile": "content",
+  "description": "A tester's checklist on the second screen. Tick off a walkthrough as you play, flag problems where they happen, and export a report with the game log.",
+  "author": "ElvieBlooms",
+  "optional_dependencies": ["kanto_gear"],
+  "permissions": ["engine_internals"]
+}
