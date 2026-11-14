@@ -1,4 +1,4 @@
--- Pokemon Pink's achievement list (76, 564 points), written for this port in
+-- Pokemon Pink's achievement list (77, 567 points), written for this port in
 -- the style of a RetroAchievements set. `uses` borrows one of Recomp
 -- Achievements' own Yellow checks (rules/gen1_official.lua); entries with
 -- no `uses` are checked by main.lua. Ids never change once released.
@@ -42,6 +42,7 @@ return {
   { id = "linking_cable_all", title = "Fully Networked", description = "Evolve Kadabra, Machoke, Graveler and Haunter with the Linking Cable on one save.", points = 10, category = "PINK", goal = 4, unit = "EVOLVED" },
   { id = "prize_dragonair", title = "Lucky Dragon", description = "Win Dragonair at the Celadon Game Corner.", points = 5, category = "PINK" },
   { id = "prize_porygon", title = "Prize Program", description = "Win Porygon at the Celadon Game Corner.", points = 10, category = "PINK" },
+  { id = "pikachu", title = "Not Version Exclusive", description = "Catch a Pikachu. In Pink it's an ordinary wild Pokémon again.", points = 3, category = "PINK" },
   { id = "surf", title = "Wave Rider", description = "Teach Clefairy Surf.", points = 3, category = "PINK" },
   { id = "surf_score", title = "Clefairy's Beach", description = "Score at least 5,000 points in the surfing minigame.", points = 10, category = "PINK" },
   -- Classic

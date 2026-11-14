@@ -112,6 +112,8 @@ return function(mod)
     unlockIf("linking_cable", cable > 0)
     progress("linking_cable_all", cable)
     unlockIf("prize_porygon", owned(s, "PORYGON"))
+    -- and the CLEFAIRY slot holds the real Pikachu
+    unlockIf("pikachu", owned(s, "CLEFAIRY"))
     -- the PIKACHU slot holds Clefairy on this cart
     local surfs = false
     for _, mon in ipairs(type(s.party) == "table" and s.party or {}) do

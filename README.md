@@ -41,7 +41,7 @@ skin itself. See [skins/pink_sgb_border](skins/pink_sgb_border/README.md).
 | `pink_presentation` | Sprites, battle pictures, partner portraits, title screen, intro, badges, slots, town map, surfing minigame, party icons, built from your imports | verified headlessly, needs playtest |
 | `pink_voice` | Clefairy voice clips | needs playtest |
 | `pink_manga_events` | Busybody challengers, Trashed House rematches, the beach house Imposter and Pikachu, Mew in Cerulean Cave | verified headlessly, needs playtest |
-| `pink_achievements` | Cart extra, not in Pink: Pink's own 76-achievement list for Recomp Achievements, in the RA Yellow list's place on the cart, with its own leaderboard | verified headlessly (`tests/achievements.lua`), needs playtest |
+| `pink_achievements` | Cart extra, not in Pink: Pink's own 77-achievement list for Recomp Achievements, in the RA Yellow list's place on the cart, with its own leaderboard | verified headlessly (`tests/achievements.lua`), needs playtest |
 | `pink_look_picker` | Cart extra, not in Pink: at NEW GAME Oak offers PRISM (Facets, Emerald Lens) to pick your look | verified headlessly, needs playtest |
 
 The Pink mods that touch species depend on `pink_partner`: they refer to Clefairy and Pikachu

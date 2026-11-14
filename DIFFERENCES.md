@@ -192,7 +192,7 @@ What each mod changes. The game's own behavior is unchanged when the mods are of
   through the mods runtime).
 
 ## pink_achievements (cart extra, not in Pink)
-- Pink's own achievement list (76 achievements, 564 points), written for this
+- Pink's own achievement list (77 achievements, 567 points), written for this
   port in the style of a RetroAchievements set: Yellow's set adapted to
   Clefairy, plus Pink's own events (the Busybody, the Imposter, Mew, the S.S.
   Anne's return, the Linking Cable, the Game Corner's Dragonair and Porygon,
