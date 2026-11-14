@@ -506,6 +506,17 @@ return function(mod)
       mod.content.maps:patch(mapId, { objects = objects })
     end
 
+    -- The ADVANCED colours give each overworld sprite an object palette by
+    -- its ROM sprite number, which a new sprite doesn't have, so it drew in
+    -- grey.  Each leader takes the palette of the Yellow sprite it replaces.
+    local function paletteOf(mapId, index)
+      local map = mod.content.maps:get(mapId)
+      local object = map and map.objects and map.objects[index]
+      local ok, def = pcall(function() return mod.content.sprites:get(object.sprite) end)
+      def = ok and type(def) == "table" and def or nil
+      return def and (def.paletteSource or def.source) or nil
+    end
+
     for _, job in ipairs(A.jobs) do
       if job.sprite and ready[job.out] then
         mod.content.sprites:override(job.sprite, {
@@ -513,6 +524,7 @@ return function(mod)
           image = ROOT .. job.out,
           frames = job.frames,
           walker = job.walker,
+          paletteSource = paletteOf(job.gym, job.object),
         })
         setLeader(job.gym, job.object, job.sprite)
       end
