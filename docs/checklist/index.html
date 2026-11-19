@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d9487f">
+<link rel="icon" href="data:,">
+<title>Pokémon Pink beta checklist</title>
+<style>
+  :root {
+    --bg: #fff7fa; --card: #ffffff; --ink: #2b1a22; --muted: #7a6670;
+    --line: #f0d6e1; --pink: #d9487f; --pink-soft: #fde3ee;
+    --done: #2f8f5b; --done-soft: #e3f4ea; --issue: #c62f3a; --issue-soft: #fde4e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1418; --card: #261b21; --ink: #f6e9ef; --muted: #b59fab;
+      --line: #3d2c35; --pink: #f07aa8; --pink-soft: #3a2230;
+      --done: #6fcf97; --done-soft: #1f3328; --issue: #ff7b84; --issue-soft: #3d1f23;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header {
+    position: sticky; top: 0; z-index: 5; background: var(--pink); color: #fff;
+    padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  header h1 { font-size: 17px; margin: 0 0 6px; font-weight: 650; }
+  .bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.3); overflow: hidden; display: flex; }
+  .bar span { display: block; height: 100%; }
+  .bar .d { background: #fff; }
+  .bar .i { background: #ffd1d6; }
+  .stats { font-size: 13px; margin-top: 5px; opacity: .95; }
+  .tools { display: flex; gap: 5px; margin-top: 8px; }
+  .tools button, .tools label {
+    flex: 1 1 auto; text-align: center; white-space: nowrap;
+    font: inherit; font-size: 13.5px; color: #fff; background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.35); border-radius: 8px; padding: 6px 4px; cursor: pointer;
+  }
+  .tools button[aria-pressed="true"] { background: #fff; color: var(--pink); }
+  main { max-width: 760px; margin: 0 auto; padding: 10px 12px 60px; }
+  .intro, .notes { color: var(--muted); font-size: 14px; }
+  .intro p, .notes p { margin: 6px 0; }
+  .notes ul { margin: 4px 0; padding-left: 20px; }
+  details.about { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin: 8px 0 14px; }
+  details.about summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+  section { margin: 18px 0; scroll-margin-top: 140px; }
+  section h2 { font-size: 16px; margin: 0 0 6px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  section h2 small { color: var(--muted); font-weight: 500; font-size: 13px; white-space: nowrap; }
+  ul.items { list-style: none; margin: 8px 0 0; padding: 0; }
+  li.item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin: 6px 0; }
+  li.item > button {
+    all: unset; box-sizing: border-box; display: flex; gap: 10px; width: 100%;
+    padding: 10px 12px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  li.item > button:focus-visible { outline: 2px solid var(--pink); border-radius: 10px; }
+  .box {
+    flex: 0 0 24px; height: 24px; border-radius: 6px; border: 2px solid var(--line);
+    display: grid; place-items: center; font-weight: 800; font-size: 15px; margin-top: 1px;
+  }
+  li.done { background: var(--done-soft); border-color: transparent; }
+  li.done .box { background: var(--done); border-color: var(--done); color: #fff; }
+  li.done .text { color: var(--muted); }
+  li.issue { background: var(--issue-soft); border-color: var(--issue); }
+  li.issue .box { background: var(--issue); border-color: var(--issue); color: #fff; }
+  .note { padding: 0 12px 10px 46px; }
+  .note textarea {
+    width: 100%; min-height: 54px; font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; resize: vertical;
+  }
+  body.hide-done li.done { display: none; }
+  body.hide-done section.complete { display: none; }
+  dialog { border: none; border-radius: 14px; padding: 0; width: min(92vw, 520px); background: var(--card); color: var(--ink); }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  dialog .head { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-weight: 650; }
+  dialog .body { padding: 8px 14px 14px; max-height: 70vh; overflow: auto; }
+  dialog .x { all: unset; cursor: pointer; padding: 4px 8px; color: var(--muted); }
+  .jump { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; gap: 10px; width: 100%; padding: 9px 4px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .jump small { color: var(--muted); white-space: nowrap; }
+  .jump.flagged small { color: var(--issue); }
+  textarea.report { width: 100%; min-height: 220px; font: 13px/1.4 ui-monospace, Menlo, monospace; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .row button { font: inherit; font-size: 14px; border-radius: 8px; padding: 7px 12px; border: 1px solid var(--line); background: var(--pink-soft); color: var(--ink); cursor: pointer; }
+  .row button.danger { color: var(--issue); }
+  #toast {
+    position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 20px; font-size: 14px;
+    opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; text-align: center;
+  }
+  #toast.show { opacity: 1; }
+  .status { padding: 30px 0; text-align: center; color: var(--muted); }
+  strong { color: var(--ink); }
+  li.done strong { color: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Pokémon Pink beta checklist</h1>
+  <div class="bar" aria-hidden="true"><span class="d" id="barDone"></span><span class="i" id="barIssue"></span></div>
+  <div class="stats" id="stats">Loading the walkthrough...</div>
+  <div class="tools">
+    <button id="btnSections" type="button">Sections</button>
+    <button id="btnHide" type="button" aria-pressed="false">Hide done</button>
+    <button id="btnReport" type="button">Report</button>
+    <button id="btnExport" type="button">Export</button>
+    <label for="importFile">Import</label>
+    <input id="importFile" type="file" accept=".json,application/json" hidden>
+  </div>
+</header>
+
+<main id="main"><div class="status">Loading the walkthrough...</div></main>
+
+<dialog id="dlgSections">
+  <div class="head">Sections <button class="x" type="button" data-close>Close</button></div>
+  <div class="body" id="sectionList"></div>
+</dialog>
+
+<dialog id="dlgReport">
+  <div class="head">Report <button class="x" type="button" data-close>Close</button></div>
+  <div class="body">
+    <p class="intro">Your flagged lines and notes, ready to paste into the Discord thread or a GitHub issue.</p>
+    <textarea class="report" id="reportText" readonly></textarea>
+    <div class="row">
+      <button type="button" id="btnCopy">Copy</button>
+      <button type="button" id="btnShareReport">Share</button>
+      <button type="button" id="btnClear" class="danger">Clear all ticks</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+// Pokémon Pink beta checklist, the web version of dev/test_checklist.
+// Reads docs/WALKTHROUGH.md the same way the in-game app does: "## " starts a
+// section, "- [ ] " lines are items, and an item's key is "section|text", so
+// ticks carry over when lines are added or moved around them.  Ticks live in
+// this browser (localStorage); Export and Import move them between devices.
+
+const SOURCES = [
+  "../WALKTHROUGH.md",
+  "https://raw.githubusercontent.com/ElvieBlooms/pokepink-g1r/main/docs/WALKTHROUGH.md",
+];
+const STORE = "pinkChecklist.v1";
+const CACHE = "pinkChecklist.walkthrough";
+const FORMAT = "pokepink-checklist";
+
+let list = null;
+let state = { marks: {}, notes: {}, updated: null };
+
+// ---------- storage (a private window or a full disk can refuse it)
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
+}
+function store(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+}
+function saveState() {
+  state.updated = new Date().toISOString();
+  if (!store(STORE, state)) toast("Couldn't save in this browser. Export to keep your ticks.");
+}
+
+// ---------- parsing, matching checklist.lua
+function clean(text) {
+  return text.replace(/\*\*(.+?)\*\*/g, "$1").replace(/`(.+?)`/g, "$1")
+    .replace(/\[(.+?)\]\((.+?)\)/g, "$1").trim();
+}
+function parse(body) {
+  const out = { title: "Checklist", intro: [], sections: [], items: [] };
+  let section = null, inComment = false;
+  for (const raw of body.split(/\r?\n/)) {
+    const line = raw.replace(/\s+$/, "");
+    if (inComment) { if (line.includes("-->")) inComment = false; continue; }
+    if (/^\s*<!--/.test(line)) { if (!line.includes("-->")) inComment = true; continue; }
+    let m;
+    if ((m = line.match(/^#\s+(.+)$/)) && out.sections.length === 0) {
+      out.title = clean(m[1]);
+    } else if ((m = line.match(/^##\s+(.+)$/))) {
+      section = { title: clean(m[1]), notes: [], items: [] };
+      out.sections.push(section);
+    } else if ((m = line.match(/^\s*[-*]\s+\[[ xX]\]\s+(.+)$/))) {
+      if (!section) { section = { title: "General", notes: [], items: [] }; out.sections.push(section); }
+      const text = clean(m[1]);
+      const item = { section, raw: m[1], text, key: section.title + "|" + text };
+      section.items.push(item); out.items.push(item);
+    } else {
+      (section ? section.notes : out.intro).push(line);
+    }
+  }
+  return out;
+}
+
+// ---------- a little markdown for notes and item text (bold, code, links)
+function esc(s) {
+  return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+function inline(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`(.+?)`/g, "<code>$1</code>")
+    .replace(/\[(.+?)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+function prose(lines) {
+  let html = "", para = [], bullets = [];
+  const flushP = () => { if (para.length) html += "<p>" + inline(para.join(" ")) + "</p>"; para = []; };
+  const flushB = () => { if (bullets.length) html += "<ul>" + bullets.map(b => "<li>" + inline(b) + "</li>").join("") + "</ul>"; bullets = []; };
+  for (const l of lines) {
+    const b = l.match(/^\s*[-*]\s+(.+)$/);
+    if (b) { flushP(); bullets.push(b[1]); }
+    else if (l.trim() === "") { flushP(); flushB(); }
+    else { flushB(); para.push(l.trim()); }
+  }
+  flushP(); flushB();
+  return html;
+}
+
+// ---------- counts
+function counts(items) {
+  let done = 0, issues = 0;
+  for (const it of items) {
+    const m = state.marks[it.key];
+    if (m === "done") done++; else if (m === "issue") issues++;
+  }
+  return { done, issues, total: items.length };
+}
+function countLabel(c) {
+  return c.done + "/" + c.total + (c.issues ? " · " + c.issues + " flagged" : "");
+}
+
+// ---------- rendering
+const main = document.getElementById("main");
+const sectionEls = [];
+
+function render() {
+  document.getElementById("title").textContent = list.title.replace(/ walkthrough$/i, " checklist");
+  document.title = list.title;
+  main.innerHTML = "";
+  sectionEls.length = 0;
+
+  const about = document.createElement("details");
+  about.className = "about";
+  const aboutSections = list.sections.filter(s => s.items.length === 0);
+  about.innerHTML = "<summary>About this checklist</summary><div class='intro'>" +
+    prose(list.intro) +
+    "<p>Tap a line to tick it, tap again to flag a problem (and add a note), and once more to clear it. " +
+    "Ticks are kept in this browser. Use <strong>Export</strong> to save them as a file and " +
+    "<strong>Import</strong> to pick up where you left off on another device.</p>" +
+    aboutSections.map(s => "<h3>" + esc(s.title) + "</h3>" + prose(s.notes)).join("") +
+    "</div>";
+  main.appendChild(about);
+
+  list.sections.forEach((s, si) => {
+    if (s.items.length === 0) return;
+    const el = document.createElement("section");
+    el.id = "s" + si;
+    const h = document.createElement("h2");
+    h.innerHTML = esc(s.title) + " <small></small>";
+    el.appendChild(h);
+    const notes = prose(s.notes);
+    if (notes) { const n = document.createElement("div"); n.className = "notes"; n.innerHTML = notes; el.appendChild(n); }
+    const ul = document.createElement("ul");
+    ul.className = "items";
+    for (const it of s.items) ul.appendChild(itemEl(it));
+    el.appendChild(ul);
+    main.appendChild(el);
+    sectionEls.push({ s, el, small: h.querySelector("small") });
+  });
+  refresh();
+}
+
+function itemEl(it) {
+  const li = document.createElement("li");
+  li.className = "item";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.innerHTML = '<span class="box" aria-hidden="true"></span><span class="text">' + inline(it.raw) + "</span>";
+  btn.addEventListener("click", () => cycle(it));
+  li.appendChild(btn);
+  it.li = li; it.btn = btn;
+  paint(it);
+  return li;
+}
+
+function paint(it) {
+  const m = state.marks[it.key];
+  it.li.className = "item" + (m ? " " + m : "");
+  it.li.querySelector(".box").textContent = m === "done" ? "✓" : m === "issue" ? "!" : "";
+  it.btn.setAttribute("aria-label", it.text + (m === "done" ? ", ticked" : m === "issue" ? ", flagged" : ""));
+  let note = it.li.querySelector(".note");
+  if (m === "issue") {
+    if (!note) {
+      note = document.createElement("div");
+      note.className = "note";
+      const ta = document.createElement("textarea");
+      ta.placeholder = "What happened, and where?";
+      ta.value = noteText(state.notes[it.key]);
+      ta.addEventListener("input", () => {
+        if (ta.value.trim()) state.notes[it.key] = ta.value; else delete state.notes[it.key];
+        saveState();
+      });
+      note.appendChild(ta);
+      it.li.appendChild(note);
+    }
+  } else if (note) {
+    note.remove();
+  }
+}
+
+// in-game notes are tables ({ where, time, log }); web notes are text
+function noteText(n) {
+  if (!n) return "";
+  if (typeof n === "string") return n;
+  return n.text || (n.where ? "At " + n.where : "");
+}
+
+function cycle(it) {
+  const m = state.marks[it.key];
+  const next = m == null ? "done" : m === "done" ? "issue" : null;
+  if (next) state.marks[it.key] = next; else { delete state.marks[it.key]; delete state.notes[it.key]; }
+  saveState();
+  paint(it);
+  if (next === "issue") { const ta = it.li.querySelector("textarea"); if (ta && !ta.value) ta.focus({ preventScroll: true }); }
+  refresh();
+}
+
+function refresh() {
+  const c = counts(list.items);
+  const pct = n => (c.total ? (100 * n / c.total) : 0) + "%";
+  document.getElementById("barDone").style.width = pct(c.done);
+  document.getElementById("barIssue").style.width = pct(c.issues);
+  const stray = Object.keys(state.marks).filter(k => !list.items.some(i => i.key === k)).length;
+  document.getElementById("stats").textContent = c.done + " of " + c.total + " ticked" +
+    (c.issues ? " · " + c.issues + " flagged" : "") +
+    (stray ? " · " + stray + " from lines no longer in the guide" : "");
+  for (const { s, el, small } of sectionEls) {
+    const sc = counts(s.items);
+    small.textContent = countLabel(sc);
+    el.classList.toggle("complete", sc.done === sc.total);
+  }
+}
+
+// ---------- sections
+const dlgSections = document.getElementById("dlgSections");
+document.getElementById("btnSections").addEventListener("click", () => {
+  const box = document.getElementById("sectionList");
+  box.innerHTML = "";
+  for (const { s, el } of sectionEls) {
+    const sc = counts(s.items);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "jump" + (sc.issues ? " flagged" : "");
+    b.innerHTML = "<span>" + esc(s.title) + "</span><small>" + countLabel(sc) + "</small>";
+    b.addEventListener("click", () => {
+      dlgSections.close();
+      if (document.body.classList.contains("hide-done") && el.classList.contains("complete")) toggleHide(false);
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    box.appendChild(b);
+  }
+  dlgSections.showModal();
+});
+
+// ---------- hide done
+const btnHide = document.getElementById("btnHide");
+function toggleHide(on) {
+  document.body.classList.toggle("hide-done", on);
+  btnHide.setAttribute("aria-pressed", on ? "true" : "false");
+  store(STORE + ".hide", on);
+}
+btnHide.addEventListener("click", () => toggleHide(!document.body.classList.contains("hide-done")));
+
+// ---------- report
+const dlgReport = document.getElementById("dlgReport");
+function reportText() {
+  const c = counts(list.items);
+  const lines = [list.title + " report", "Ticked " + c.done + " of " + c.total + ", flagged " + c.issues, ""];
+  for (const s of list.sections) {
+    const flagged = s.items.filter(i => state.marks[i.key] === "issue");
+    if (!flagged.length) continue;
+    lines.push(s.title + ":");
+    for (const it of flagged) {
+      lines.push("- " + it.text);
+      const n = noteText(state.notes[it.key]).trim();
+      if (n) lines.push("  " + n.replace(/\n/g, "\n  "));
+    }
+    lines.push("");
+  }
+  if (!c.issues) lines.push("Nothing flagged.");
+  return lines.join("\n").trim();
+}
+document.getElementById("btnReport").addEventListener("click", () => {
+  document.getElementById("reportText").value = reportText();
+  dlgReport.showModal();
+});
+document.getElementById("btnCopy").addEventListener("click", async () => {
+  const ta = document.getElementById("reportText");
+  try { await navigator.clipboard.writeText(ta.value); toast("Copied"); }
+  catch (e) { ta.select(); document.execCommand("copy"); toast("Copied"); }
+});
+document.getElementById("btnShareReport").addEventListener("click", async () => {
+  const text = document.getElementById("reportText").value;
+  if (navigator.share) { try { await navigator.share({ text }); } catch (e) {} }
+  else toast("Sharing isn't available here. Use Copy instead.");
+});
+document.getElementById("btnClear").addEventListener("click", () => {
+  if (!confirm("Clear every tick and note on this device? Export first if you want to keep them.")) return;
+  state = { marks: {}, notes: {}, updated: null };
+  saveState();
+  dlgReport.close();
+  render();
+  toast("Cleared");
+});
+
+// ---------- export and import
+function stamp() {
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes());
+}
+document.getElementById("btnExport").addEventListener("click", async () => {
+  const data = {
+    format: FORMAT, version: 1, walkthrough: list.title,
+    exported: new Date().toISOString(), marks: state.marks, notes: state.notes,
+  };
+  const name = "pink-checklist-" + stamp() + ".json";
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  // phones: offer the share sheet (Files, Drive, a chat) when it takes files
+  try {
+    const file = new File([blob], name, { type: "application/json" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: name });
+      return;
+    }
+  } catch (e) { if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast("Saved " + name);
+});
+
+document.getElementById("importFile").addEventListener("change", async (ev) => {
+  const file = ev.target.files && ev.target.files[0];
+  ev.target.value = "";
+  if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (e) { return toast("That file isn't a checklist export."); }
+  if (!data || data.format !== FORMAT || typeof data.marks !== "object") return toast("That file isn't a checklist export.");
+  const marks = {}, notes = {};
+  for (const [k, v] of Object.entries(data.marks)) if (v === "done" || v === "issue") marks[k] = v;
+  for (const [k, v] of Object.entries(data.notes || {})) if (marks[k] === "issue") notes[k] = v;
+  const have = Object.keys(state.marks).length;
+  if (have && !confirm("Replace the " + have + " ticks on this device with the " + Object.keys(marks).length + " in this file?")) return;
+  state = { marks, notes, updated: null };
+  saveState();
+  render();
+  const known = list.items.filter(i => marks[i.key]).length;
+  toast("Imported " + known + " ticks" + (data.exported ? " from " + data.exported.slice(0, 10) : ""));
+});
+
+// ---------- dialogs close on their Close button or a tap outside
+for (const d of document.querySelectorAll("dialog")) {
+  d.querySelector("[data-close]").addEventListener("click", () => d.close());
+  d.addEventListener("click", e => { if (e.target === d) d.close(); });
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+// ---------- start: fetch the walkthrough, fall back to the last copy seen
+(async function start() {
+  const saved = load(STORE);
+  if (saved && saved.marks) state = { marks: saved.marks, notes: saved.notes || {}, updated: saved.updated };
+  if (load(STORE + ".hide")) toggleHide(true);
+  let body = null;
+  for (const url of SOURCES) {
+    try {
+      const r = await fetch(url, { cache: "no-cache" });
+      if (r.ok) { body = await r.text(); break; }
+    } catch (e) {}
+  }
+  if (body) store(CACHE, body);
+  else body = load(CACHE);
+  if (!body) {
+    main.innerHTML = '<div class="status">Couldn\'t load the walkthrough. Check your connection and reload.</div>';
+    document.getElementById("stats").textContent = "Not loaded";
+    return;
+  }
+  list = parse(body);
+  render();
+})();
+</script>
+</body>
+</html>

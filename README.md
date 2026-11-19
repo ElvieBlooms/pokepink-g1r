@@ -11,7 +11,10 @@ rebuilt as a set of mods on top of your own Pokémon Yellow.
 
 **Beta testers:** [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) walks through
 what should happen, story-wise, so you can compare and report anything that
-doesn't match.
+doesn't match. The same walkthrough is a tickable checklist at
+[elvieblooms.github.io/pokepink-g1r](https://elvieblooms.github.io/pokepink-g1r/checklist/),
+for your phone: ticks stay in the browser, and Export and Import move them
+between devices.
 
 No ROM, patch, disassembly or ROM-derived art is included. You import your own
 Pokémon Yellow in Gen1Recomp, and these mods rebuild Pink's changes on top of it.
