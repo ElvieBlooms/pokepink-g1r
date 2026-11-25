@@ -11,10 +11,16 @@ rebuilt as a set of mods on top of your own Pokémon Yellow.
 
 **Beta testers:** [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) walks through
 what should happen, story-wise, so you can compare and report anything that
-doesn't match. The same walkthrough is a tickable checklist at
-[elvieblooms.github.io/pokepink-g1r](https://elvieblooms.github.io/pokepink-g1r/checklist/),
-for your phone: ticks stay in the browser, and Export and Import move them
-between devices.
+doesn't match. The same walkthrough is a tickable checklist in
+[Field Notes](https://github.com/ElvieBlooms/field_notes):
+- **On your phone:** open
+  [the Pink checklist](https://elvieblooms.github.io/field_notes/?url=https%3A%2F%2Fraw.githubusercontent.com%2FElvieBlooms%2Fpokepink-g1r%2Fmain%2Fdocs%2FWALKTHROUGH.md).
+  Ticks stay in the browser, and ticks from the old checklist page carry over.
+- **In the game:** install Field Notes and put a copy of `WALKTHROUGH.md` in
+  the `field_notes` folder in your save folder. Then pick it from Field Notes'
+  **CHECKLIST** menu.
+- **Between the two:** Export and Import on the page and **SAVE TICKS FILE**
+  and **LOAD TICKS FILE** in the game move your ticks either way.
 
 No ROM, patch, disassembly or ROM-derived art is included. You import your own
 Pokémon Yellow in Gen1Recomp, and these mods rebuild Pink's changes on top of it.
