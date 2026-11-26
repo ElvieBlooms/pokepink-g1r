@@ -107,6 +107,65 @@ return function(mod)
     trueColor = true,
   })
 
+  -- Wild Pokémon from other mods.  Pink's own data uses the swapped slots,
+  -- but another mod's "PIKACHU" means a real Pikachu, so a swarm or contest
+  -- from another mod would turn up as Clefairy.  Every wild encounter is
+  -- swapped back to real names on its way out, except Pink's own Pikachu:
+  -- the CLEFAIRY slot rolled straight from the table on Route 2 or in the
+  -- Power Plant, the only places Pink puts it.  Pink never puts the PIKACHU,
+  -- RAICHU or CLEFABLE slots in the wild, so those always swap.  Scripted
+  -- battles (mod.world:startWildBattle), gifts, trades and trainer teams
+  -- don't pass through these hooks and keep the slot names.
+  local OWN_PIKACHU = { ROUTE_2 = true, POWER_PLANT = true }
+
+  local function realName(species, ownRoll, mapId)
+    if species == "CLEFAIRY" and ownRoll and OWN_PIKACHU[mapId] then return species end
+    return SWAP[species] or species
+  end
+
+  local function swapped(enc, ownRoll, mapId)
+    if type(enc) ~= "table" or not SWAP[enc.species] then return enc end
+    local to = realName(enc.species, ownRoll, mapId)
+    if to == enc.species then return enc end
+    local out = {}
+    for k, v in pairs(enc) do out[k] = v end
+    out.species = to
+    return out
+  end
+
+  -- encounters as the table rolled them, before any other mod's wrapper,
+  -- with the species they were rolled as (weak keys: nothing outlives its battle)
+  local tableRolls = setmetatable({}, { __mode = "k" })
+  mod.hooks:wrap("encounter.roll", function(next, encDef, ctx)
+    local enc = next(encDef, ctx)
+    if type(enc) == "table" then tableRolls[enc] = enc.species end
+    return enc
+  end, -1000)
+
+  mod.hooks:wrap("encounter.species", function(next, enc, ctx)
+    local out = next(enc, ctx)
+    local own = type(out) == "table" and tableRolls[out] == out.species
+    return swapped(out, own, ctx and ctx.mapId)
+  end, 1000)
+
+  mod.hooks:wrap("encounter.fishing", function(next, rod, mapId, candidates)
+    return swapped(next(rod, mapId, candidates), false, mapId)
+  end, 1000)
+
+  -- previews (mod.world:effectiveEncounters): the same names, by weight
+  mod.hooks:wrap("encounter.table", function(next, dist, ctx)
+    local d = next(dist, ctx)
+    if type(d) ~= "table" then return d end
+    local mapId = ctx and ctx.mapId
+    local out, changed = {}, false
+    for species, weight in pairs(d) do
+      local to = realName(species, true, mapId)
+      if to ~= species then changed = true end
+      out[to] = (out[to] or 0) + weight
+    end
+    return changed and out or d
+  end, 1000)
+
   -- Tester option, off by default: turn it on in the mod manager to get one
   -- Moon Stone per save (the first time you enter a map), for checking that
   -- the partner refuses to evolve.
